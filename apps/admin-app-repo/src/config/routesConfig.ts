@@ -8,6 +8,15 @@ export const PUBLIC_ROUTES = [
   '/demo',
   '/logout',
   '/workspace',
+  '/swadhaar',
+  '/swadhaar/login',
+  '/swadhaar/dashboard',
+  '/swadhaar/user-management',
+  '/swadhaar/role-management',
+  '/swadhaar/content-library',
+  '/swadhaar/course-management',
+  '/swadhaar/notification-management',
+  '/swadhaar/analytics',
 ];
 // Universal role-based routes for all tenants
 const UNIVERSAL_ROLE_ROUTES = {

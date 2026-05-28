@@ -1,0 +1,1821 @@
+1. UI & Functionality Breakdown
+The interface consists of a centered, card-based login module designed with clear
+visual hierarchies and a minimalist layout (p. 1).
+
+Visual and Input Elements
+●​ Brand Identifier / Logo: Positioned at the top center of the card (p. 1). Displays
+the official Swadhaar FinAccess sun icon and typography to establish brand
+authenticity (p. 1).
+●​ Header Section:
+○​ Title: Large bold text displaying "Sign in" (p. 1).
+○​ Subtitle: Explanatory text reading "Welcome back to Swadhaar Admin
+Panel" to anchor the user context (p. 1).
+●​ Username Input Field:
+
+○​ Label: Static text reading "Username" positioned directly above the input
+box (p. 1).
+○​ Placeholder Text: Contextual hint reading "Enter username" inside a
+border-radius rectangle box (p. 1).
+●​ Password Input Field:
+○​ Label: Static text reading "Password" positioned directly above the input
+box (p. 1).
+○​ Placeholder Text: Contextual hint reading "Enter Password" (p. 1).
+Security masking must apply to any value entered here.
+●​ Remember Me Selection: A standard, unchecked square checkbox paired with
+the label "Remember Me" (p. 1).
+●​ Sign In Trigger: A prominent, full-width dark navy blue button containing centered
+white text labeled "Sign In" (p. 1).
+●​
+●​
+
+LinkedIn India
+
+●​
+
+Underlying Logic & Edge-Case Rules
+●​ Field Validation Rules:
+○​ Both fields are required parameters. Pressing "Sign In" with empty inputs
+must trigger localized inline validation messages.
+○​ Input sanitization must strip hazardous character sequences to block
+cross-site scripting (XSS) or SQL injection payloads.
+●​ Remember Me Behavior: Checking this element saves a persistent, encrypted
+session token in local browser cookies. If unselected, session contexts expire
+immediately upon closing the active browser tab or window.
+●​ Authentication & Security Boundaries:
+○​ Transfers input payloads exclusively over encrypted HTTPS pathways.
+○​ Implements an account lockout policy if five consecutive invalid credential
+strings are entered.
+
+2. Step-by-Step User Guide
+Goal
+Gain access to internal management dashboards on the Swadhaar Admin Panel (p. 1).
+
+Steps
+1.​ Open the Admin URL: Launch an approved, secure web browser and type the
+target web address assigned for the Swadhaar Admin Panel.
+2.​ Input Username: Click on the box below the "Username" label (p. 1). Type your
+assigned alphanumeric platform username (p. 1).
+3.​ Input Password: Click on the box below the "Password" label (p. 1). Type your
+secure personal account password (p. 1).
+4.​ Set Session Persistence (Optional): If operating from an authorized, secure
+individual terminal, click the square checkbox next to "Remember Me" to bypass
+manual login steps during future visits (p. 1).
+5.​ Submit Credentials: Click the dark navy "Sign In" action button at the bottom of
+the card (p. 1).
+6.​ Post-Authentication Action: Upon server validation, you will automatically redirect
+to the primary admin system dashboard.
+
+3. Functional Test Case Suite
+Scenario
+Test ID
+
+Description
+
+Input Steps
+
+Expected System Outcome
+
+TC_001
+
+Valid credentials
+
+Enter correct username and
+
+System authorizes access;
+
+routing
+
+password. Click "Sign In" (p. 1).
+
+routes user to admin main
+dashboard.
+
+TC_002
+
+Missing fields
+
+Leave fields empty. Click "Sign
+
+System blocks submission;
+
+verification
+
+In" (p. 1).
+
+throws "Field is required"
+errors.
+
+TC_003
+
+Invalid password
+
+Input valid username + wrong
+
+Access denied message
+
+security
+
+password. Click "Sign In" (p. 1).
+
+displayed: "Invalid username or
+password".
+
+TC_004
+
+TC_005
+
+Remember Me
+
+Check "Remember Me",
+
+Login screen is bypassed;
+
+functional check
+
+authenticate, close browser,
+
+active session dashboard
+
+return to URL (p. 1).
+
+opens directly.
+
+Input character
+
+Enter alphanumeric characters
+
+Plaintext characters mask
+
+masking
+
+inside the Password field (p. 1).
+
+immediately into secure bullet
+points (••••).
+
+4. Gherkin Feature Scenarios
+gherkin
+Feature: Swadhaar Admin Panel Authentication
+Background:
+Given the user navigates to the Swadhaar Admin Panel login page
+Scenario: Successful authorization with valid credentials
+When the user enters a valid username "admin_user"
+And the user enters a valid password "P@ssword123"
+And the user clicks the "Sign In" button
+Then the system should authorize the account session
+And redirect the browser to the main administration dashboard
+Scenario: Authentication rejection due to empty inputs
+When the user leaves the "Username" and "Password" fields blank
+And the user clicks the "Sign In" button
+Then the system should prevent submission validation
+
+And display inline errors stating "This field is required" under both inputs
+Scenario: Persistent login validation via Remember Me
+When the user enters a valid username "admin_user"
+And the user enters a valid password "P@ssword123"
+And the user selects the "Remember Me" checkbox
+And the user clicks the "Sign In" button
+Then the system should log the user in successfully
+When the user closes and reopens the browser window to the login link
+Then the page should automatically log in and bypass the sign-in screen
+
+UI and Functionality Breakdown
+1. Left Sidebar Navigation Panel
+●​ Logo Brand Area: Displays the platform brand logo at the top left corner.
+●​ Navigation Links: List of structural system modules:
+○​ Dashboard: Current active page highlighted with a light grey background
+treatment.
+○​ User Management: Link to access user and cohort creation tools.
+○​ Role Management: Configures security authorization matrices.
+○​ Content Library & Course Management: Infrastructure tools for modules.
+○​ Notification Management: Broadcast setup layout.
+●​ Metabase Analytics: A dedicated dark blue block menu button. The green "D"
+circle badge highlights this option.
+●​ Profile Option: Renders the user indicator profile button ("Ankur") at the bottom of
+the sidebar list.
+●​ Log Out: Link to terminate the active authentication session.
+2. Top Header & Welcome Section
+
+●​ Dashboard Title: Labeled Dashboard with the subtext "Overview of your
+educational platform and key metrics."
+●​ Welcome Message: Personalized hero header text string stating "Welcome back,
+Ankur!
+
+👋".
+
+3. Quick Actions Grid
+●​ Section Heading: "Quick Actions" accompanied by subtext "Common links to
+help you get things done faster".
+●​ Interactive Cards: Four white action items with line icons providing fast
+redirection shortcuts:
+○​ Create Course: Shortcut to open a clean course construction workspace.
+○​ Manage Users: Quick routing directly to the user data list.
+○​ Manage Notifications: Path to send global announcements.
+○​ View Analytics: Quick navigation link straight to performance data
+reporting.
+
+4. Metabase Dashboard Container
+●​ Central Visual Placeholder: Features an explicit placeholder visualization
+containing a green circle logo icon "D".
+●​ Label: Labeled Metabase Dashboard/Charts indicating embedded reporting and
+business intelligence visualization tools load here.
+5. Informational Sticky Note (Yellow Box)
+●​ UI Location: Top right workspace corner outside the primary mockup viewport
+frame.
+●​ Instructional Content Text: Reads "The profile menu option (Eg: Ankur) on the
+sidebar is view only".
+
+Step-by-Step User Guide
+1. Navigating via the Platform Sidebar
+
+●​ Locate the left-aligned panel menu area.
+●​ Click any option (e.g., User Management) to redirect out of the main landing
+panel.
+●​ View your current logged-in identity label at the bottom ("Ankur"). Note that this
+element is non-clickable and serves as a view-only identifier.
+2. Launching Quick Action Workflows
+●​ Find the Quick Actions row underneath the main greeting message banner.
+●​ Select an operational shortcut link card depending on your immediate goal (e.g.,
+click Create Course).
+●​ Use these cards as direct shortcuts instead of digging through the sidebar
+menus.
+3. Reviewing Analytics Data
+●​ View real-time platform metrics charts inside the central Metabase
+Dashboard/Charts section.
+●​ To expand or deep-dive into full custom reporting tables, click the dark blue
+Metabase Analytics sidebar option.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Dashboard Layout Validation and Interactions
+
+gherkin
+Scenario: Verify non-interactive view-only behavior of the profile label
+Given the user "Ankur" is looking at the Admin Panel dashboard layout
+When the user attempts to hover or click on the profile option "Ankur" at the bottom sidebar
+Then the mouse pointer should not change to an interactive hand pointer status
+And no action or profile management overlay context menu should appear
+Scenario: Route using the Quick Action Create Course card shortcut
+Given the user is on the main Admin Panel welcoming greeting layout view
+When the user clicks on the "Create Course" card inside the Quick Actions section
+Then the platform should intercept the command and navigate directly to the Course Builder page
+
+UI and Functionality Breakdown
+Header & Toggle Context
+●​ Page Navigation Tabs: Located at the top of the workspace. The Users (10) tab
+is actively selected, switching the data grid focus from cohorts to individual
+platform profiles.
+●​ Add User Button: The top-right primary button text changes dynamically based
+on the current administrator's organizational role.
+○​ Example: Displays "+ Add User" for standard admins, but changes to "+
+Add CFL Incharge" if the logged-in supervisor is a CFL Incharge.
+
+Dynamic Selection & Bulk Operations
+●​ Mass Target Action Links: Shows the current manual selection metrics ("2 items
+selected") alongside quick links for Select all (233) and Deselect all.
+●​ Group Actions Section: Displays dynamic bulk action links based on row
+selections:
+○​ Add to Existing Cohort: Mass-assigns checked individual profiles into an
+established cohort container.
+○​ Create new Cohort: Groups selected items together to initialize a
+brand-new cohort path.
+○​ Bulk Edit: Modifies common field values (e.g., regional districts or system
+roles) simultaneously across all selected profiles.
+
+Yellow Note Requirements (Functional & UI Constraints)
+●​ Multi-User Actions: When multiple user records are selected, bulk actions change
+to feature Archive (soft delete) and Unarchive operations.
+●​ Role View Consistency: Interface structures remain identical across views for
+CFL Incharge, SDI, DI, and Admin roles.
+●​ Button Customization Rules: The primary registration button's text updates to
+reflect the user's specific role definition.
+Data Table Grid Columns
+●​ Inline Actions Menu: The Select Action dropdown menu for individual rows
+features isolated options: Edit User, Add to Cohort, and a red Archive User link.
+●​ Data Fields: Standard fields map the user's identity, including First Name, Last
+Name, Date Joined, Role, Contact Number, Email, and a green Active status
+indicator.
+
+Step-by-Step User Guide
+1. Managing Dynamic Registration via the Custom Button
+
+●​ Navigate to the top-right corner of the active Users management pane.
+●​ Read the button label text to verify your administrative scope (e.g., "+ Add User"
+or "+ Add CFL Incharge").
+●​ Click the button to launch the specific profile creation form.
+2. Executing Group Operations for Multiple Users
+●​ Select specific target user checkboxes from the data table, or click Select all
+(233).
+●​ Navigate to the right side of the interface above the table header to find the
+Group Actions section.
+●​ Click Add to Existing Cohort to merge them into a group, or select Bulk Edit to
+update common user values simultaneously.
+3. Individual Soft-Deleting via Inline Menus
+●​ Find the specific user row you want to remove (e.g., "Priya Kadam").
+●​ Click the Select Action dropdown menu in the rightmost column for that row.
+●​ Click the red Archive User link to soft-delete the profile, which updates its status
+without removing it from the database entirely.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Dynamic Role-Based Button Rendering
+
+gherkin
+Scenario: Render standard user registration button for Admin accounts
+Given an administrator accounts supervisor is logged into the management system
+When the user navigates onto the master "User Management" dashboard page view
+Then the top-right primary call-to-action button text should read "+ Add User"
+Scenario: Render customized role registration button for CFL Incharge accounts
+Given a user with the organizational role of "CFL Incharge" is logged into the system
+When the user navigates onto the master "User Management" dashboard page view
+Then the top-right primary call-to-action button text must change to "+ Add CFL Incharge"
+Use code with caution.
+
+Feature: Multi-Selection Contextual Action Bars
+
+gherkin
+Scenario: Toggle bulk soft-delete actions upon selecting multiple user rows
+Given the user is looking at the populated individual Users list data table grid
+When the user checks the selection checkboxes for multiple user rows simultaneously
+Then the "Group Actions" context panel links should update dynamically
+And the panel must display "Archive (soft delete)" and "Unarchive" options to the user
+Scenario: Bulk route multiple profile records into a new cohort container
+Given the user selects the "Select all (233)" action link on the user management page
+When the user clicks the "Create new Cohort" link under the Group Actions header area
+Then the system should forward the user to the Cohort Creation wizard page
+And the wizard must pre-populate the staging container with all 233 se
+
+UI and Functionality Breakdown
+1. Page Flow Connections
+
+●​ Red Mapping Lines: Connect trigger actions from the User Management list table
+on the left to two separate drawer overlays.
+
+●​ Add User Trigger: The main page action elements map directly into the clean
+Add User form layout.
+●​ Edit User Trigger: Clicking the inline row action "Edit User" pulls out the
+pre-populated Edit User panel workspace.
+2. "Add User" Drawer Overlays (Center)
+
+●​ Header Elements: Form title label reading Add User with a right-aligned close
+cross layout anchor (
+●​ ).
+●​ Required Input Parameters: Form fields marked with an asterisk (
+●​ ) indicate mandatory entry constraints:
+○​ First Name / Last Name: Blank data capture fields with placeholder hints
+("Enter First Name").
+○​ Email: Identity field containing placeholder mask layout validation rules
+("Enter email").
+○​ Mobile Number: Captures contact information with a length restriction
+mask label ("Enter Mobile Number (eg. +91XXXXXXXXXX)").
+○​ Gender: Text dropdown menu field layer ("Select gender").
+○​ Geographic Cascade Matrix: Independent dropdown lists to isolate
+locations step-by-step: State, District, Block, and Village.
+○​ System Role Designation: Mandatory dropdown choice to define access
+permissions (e.g., Admin, CFL Incharge).
+●​ Primary Button Action: A dark blue Create User validation button situated at the
+bottom right corner.
+3. "Edit User" Drawer Overlays (Right)
+
+●​ Pre-Populated Profiles: Holds the identical form structure as the creation screen,
+but maps and loads existing server metrics into each corresponding field layer
+(e.g., First Name: "Priya", Email: "priya.kadam@swadhaar.org").
+●​ Destructive Control Layer: Adds a red layout button at the bottom left reading
+Archive User. This lets administrators perform quick profile deactivations without
+exiting the update panel.
+●​ Update Confirmation Action: A dark blue Update User validation button to commit
+modifications.
+
+Step-by-Step User Guide
+1. Launching and Submitting a New Profile Creation Form
+
+●​ Click the primary registration call-to-action button on the main dashboard screen
+to slide out the Add User drawer.
+●​ Fill in all mandatory identity text inputs, including First Name, Last Name, Email,
+and Mobile Number.
+●​ Use the regional cascading menus to select locations step-by-step: select your
+State first to automatically update the available options in the District, Block, and
+Village dropdowns.
+●​ Assign system capabilities using the Role dropdown menu selector box.
+●​ Click the dark blue Create User validation button to save the new profile to the
+system.
+2. Updating Profile Information or Deactivating Users
+
+●​ Click the Select Action dropdown next to a user row in the table, then choose
+Edit User to open the side panel.
+●​ Overwrite any outdated information directly in the editable text fields.
+
+●​ Click the blue Update User button at the bottom right to apply and save your
+changes.
+●​ To soft-delete or remove the active profile, click the red outline Archive User
+button at the bottom left of the panel instead.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Geographic Dropdown Cascading Logic
+
+gherkin
+Scenario: Validate dropdown population sequencing during user creation
+Given the admin has open the "Add User" creation panel workspace drawer
+And the District dropdown selection list is currently locked or disabled
+When the user selects a valid entry option from the "State" dropdown menu list
+Then the system should fetch the matching geographic profile records
+And the "District" dropdown menu must unlock to display the filtered region choices
+
+Use code with caution.
+
+Feature: Data Validation and Field Enforcement
+
+gherkin
+Scenario: Prevent user registration when required parameters are missing
+Given the admin has open the "Add User" creation panel workspace drawer
+And the admin leaves the mandatory "Mobile Number" input field completely blank
+When the user clicks the dark blue "Create User" validation button
+Then the form submission process must intercept and halt immediately
+And a red validation error indicator "Mobile Number is required" should display under the field
+
+Use code with caution.
+
+Feature: Profile Updates and Soft-Deactivations
+
+gherkin
+Scenario: Update existing user data through the Edit User panel
+Given the admin opens the "Edit User" drawer panel for "Priya Kadam"
+When the user updates the "First Name" text field value to "Priyanka"
+And the user clicks the blue "Update User" confirmation button
+Then the drawer panel should close automatically
+And the main data table row must immediately update to display the name "Priyanka"
+Scenario: Soft-delete a user profile directly from the editing panel
+Given the admin opens the "Edit User" drawer panel for an active profile
+When the user clicks the red outline "Archive User" destructive action button
+Then the system should trigger a background profile status update request
+And the drawer should close, showing the profile status as "Archived" on the dashboard
+
+Use code with caution.
+
+If you would like to proceed, let me know if you need help designing regex validation
+strings for the mobile phone input field or writing integration test scripts to verify the
+geographic cascading logic.
+designing regex validation strings for the mobile phone input field or writing integration
+test scripts to verify the geographic cascading logic.
+
+1. Regex Validation Patterns for Mobile Number Input
+To strictly enforce the placeholder mask (+91XXXXXXXXXX) seen in the UI, use the
+following validation patterns:
+Standard Indian Format Regex (+91 Prefix Required)
+
+●​ Pattern: /^\+91[6-9]\d{9}$/
+●​ Explanation:
+
+○​ ^\+91: Must start exactly with the country code +91.
+○​ [6-9]: The first digit of the mobile number must be 6, 7, 8, or 9 (valid
+Indian mobile series).
+○​ \d{9}$: Must end with exactly 9 digits after the initial series digit. Total
+length is exactly 13 characters.
+
+Flexible UI Formatting Regex (Optional Spaces/Hyphens)
+
+●​ Pattern: /^\+91[\s-]?[6-9]\d{3}[\s-]?\d{3}[\s-]?\d{3}$/
+●​ Explanation: Allows common pasting variants like +91 98765 43210 or
++91-98765-43210 while enforcing structural validity.
+
+2. Integration Test Script (Playwright TypeScript)
+This integration test verifies the backend integration and UI behavior of the cascading
+geographic matrix (State
+
+District
+
+Block
+Village).
+
+typescript
+import { test, expect } from '@playwright/test';
+test.describe('User Creation - Geographic Cascading Integration Matrix', () => {
+test.beforeEach(async ({ page }) => {
+// Intercept API calls to supply controlled mock data for the cascade layers
+
+await page.route('**/api/geo/states', async route => {
+await route.fulfill({ json: [{ id: 'ST-01', name: 'Maharashtra' }] });
+});
+await page.route('**/api/geo/districts?stateId=ST-01', async route => {
+await route.fulfill({ json: [{ id: 'DT-05', name: 'Pune' }] });
+});
+await page.route('**/api/geo/blocks?districtId=DT-05', async route => {
+await route.fulfill({ json: [{ id: 'BK-12', name: 'Haveli' }] });
+});
+await page.route('**/api/geo/villages?blockId=BK-12', async route => {
+await route.fulfill({ json: [{ id: 'VL-88', name: 'Wagholi' }] });
+});
+// Open the Add User drawer form layout
+await page.goto('/user-management');
+await page.locator('button:has-text("Add User")').click();
+});
+test('Should unlock and chain geographical choices sequentially down the matrix', async ({ page })
+=> {
+// 1. Target Selectors
+const stateDropdown = page.locator('div[data-testid="state-select"]');
+const districtDropdown = page.locator('div[data-testid="district-select"]');
+const blockDropdown = page.locator('div[data-testid="block-select"]');
+const villageDropdown = page.locator('div[data-testid="village-select"]');
+// 2. Initial State Verification (Downstream lists must be disabled)
+await expect(districtDropdown).toBeDisabled();
+await expect(blockDropdown).toBeDisabled();
+await expect(villageDropdown).toBeDisabled();
+// 3. Step 1: Select State
+await stateDropdown.click();
+await page.locator('role=option[name="Maharashtra"]').click();
+// Verify District unlocks after the State API returns data
+await expect(districtDropdown).toBeEnabled();
+await expect(blockDropdown).toBeDisabled();
+// 4. Step 2: Select District
+await districtDropdown.click();
+await page.locator('role=option[name="Pune"]').click();
+
+// Verify Block unlocks after the District API returns data
+await expect(blockDropdown).toBeEnabled();
+await expect(villageDropdown).toBeDisabled();
+// 5. Step 3: Select Block
+await blockDropdown.click();
+await page.locator('role=option[name="Haveli"]').click();
+// Verify Village unlocks after the Block API returns data
+await expect(villageDropdown).toBeEnabled();
+// 6. Step 4: Select Village
+await villageDropdown.click();
+await page.locator('role=option[name="Wagholi"]').click();
+// Final form verification step
+await expect(page.locator('button:has-text("Create User")')).toBeEnabled();
+});
+test('Should clear downstream selection choices if a top root state is reset', async ({ page }) => {
+const stateDropdown = page.locator('div[data-testid="state-select"]');
+const districtDropdown = page.locator('div[data-testid="district-select"]');
+// Select state and district first
+await stateDropdown.click();
+await page.locator('role=option[name="Maharashtra"]').click();
+await districtDropdown.click();
+await page.locator('role=option[name="Pune"]').click();
+// Clear or reset the root State dropdown element
+await stateDropdown.locator('.clear-icon').click();
+// Downstream values should instantly lock back up and drop values to prevent invalid data sets
+await expect(districtDropdown).toBeDisabled();
+await expect(districtDropdown).toHaveText('Select District');
+});
+});
+
+​
+​
+
+​
+​
+
+UI and Functionality Breakdown
+1. "Bulk Edit Users" Drawer Panel (Left)
+●​ Header Elements: Form title label reading Bulk Edit Users with a right-aligned
+close cross utility button (
+●​ ).
+●​ Mandatory Field Elements: Every configuration parameter dropdown is marked
+with an asterisk (
+●​ ) to enforce input execution:
+○​ State / District / Block / Village: Tiered location assignment dropdown
+fields to update geographic regional routing parameters simultaneously.
+○​ Role: Security role assignment dropdown (e.g., updating multiple profiles
+to "Trainer" at once).
+●​ Destructive Control Action Button: A red outline action item at the bottom left
+reads Archive Users (2). This allows administrators to soft-delete the exact count
+of currently checked profiles instantly.
+●​ Confirmation Control: A dark blue button labeled Bulk Update Users executes the
+batch data modifications.
+2. "Add Users to Cohort" Floating Modal Card (Right)
+●​ Header Elements: Context modal titled Add Users to Cohort featuring an
+independent dismissal close anchor cross (
+
+●​ ).
+●​ Cohort Selection: A mandatory dropdown field labeled Select Cohort * containing
+a text lookup feature ("Search Cohorts (eg: CFL Torpa)").
+●​ Execution Call-to-Action: A dark blue submit button labeled Add Users to Cohort
+to save and commit changes.
+
+Step-by-Step User Guide
+1. Performing Multi-User Location or Role Updates
+●​ Select multiple user checkboxes from the master table, then click the Bulk Edit
+action link to slide open the side panel.
+●​ Choose new geographical routes sequentially from the State, District, Block, and
+Village dropdown lists to update their assignments in bulk.
+●​ To modify access permissions for all selected profiles at once, select a tier from
+the Role dropdown.
+●​ Click the blue Bulk Update Users button at the bottom right to apply the changes
+to all selected rows simultaneously.
+2. Archive Multiple Profiles Simultaneously
+●​ Open the Bulk Edit Users panel with your target accounts selected.
+●​ Locate the red outline button at the bottom left, which displays the exact selection
+count (e.g., Archive Users (2)).
+●​ Click the button to soft-delete all targeted users at once.
+3. Mass-Assigning Users to an Established Cohort Group
+●​ Click the Add to Existing Cohort group action link from the main table view to
+display the centered floating modal card.
+●​ Click inside the Select Cohort input field.
+●​ Type a search query to find your target group (e.g., "CFL Torpa"), then select it
+from the filtered dropdown list.
+●​ Click the dark blue Add Users to Cohort button to finalize the assignment.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Bulk Parameter Modification Drawer
+
+gherkin
+Scenario: Successfully apply regional location parameters to multiple records at once
+Given the admin has selected 2 user profiles and open the "Bulk Edit Users" panel
+When the user updates the "State" dropdown selection to a new region
+And the user selects values for the cascading "District", "Block", and "Village" fields
+And the user clicks the dark blue "Bulk Update Users" confirmation button
+Then the system should run a batch background update process
+And the main user management table must display the updated location parameters for both
+profiles
+Scenario: Execute mass soft-deletion using the bulk archive control button
+Given the admin has open the bulk editing panel with exactly 2 user records staged
+And the destructive button label reads "Archive Users (2)"
+When the user clicks the red "Archive Users (2)" button
+Then the application should soft-delete both target profiles simultaneously
+And the drawer should close, updating both user statuses to "Archived" on the dashboard
+Use code with caution.
+
+Feature: Cohort Group Assignment Modal
+
+gherkin
+Scenario: Search and assign selected profiles to a cohort group
+Given the admin has initiated the "Add Users to Cohort" modal overlay card
+When the user types "CFL Torpa" into the "Select Cohort" lookup field
+And the user selects the matching cohort item from the auto-suggest list
+And the user clicks the dark blue "Add Users to Cohort" validation button
+Then the system should assign all selected user profiles to that cohort group
+And the modal should close automatically, displaying a success confirmation toast
+Use code with caution.
+
+Integration Test Script: Geographic Cascading Logic (Cypress
+JavaScript)
+This script automates verification of the dropdown dependency chain (State
+District
+Block
+
+Village) within the bulk editing panel.
+
+javascript
+describe('Bulk Edit Panel - Geographic Dropdown Chaining Verification', () => {
+beforeEach(() => {
+// Intercept API routes to supply stable mock geographic data structures
+cy.intercept('GET', '**/api/geo/states', { fixture: 'states.json' }).as('getStates');
+cy.intercept('GET', '**/api/geo/districts?*', { body: [{ id: 'D1', name: 'Pune' }] }).as('getDistricts');
+cy.intercept('GET', '**/api/geo/blocks?*', { body: [{ id: 'B1', name: 'Haveli' }] }).as('getBlocks');
+cy.intercept('GET', '**/api/geo/villages?*', { body: [{ id: 'V1', name: 'Wagholi' }] }).as('getVillages');
+// Load user list page and trigger bulk edit panel drawer
+cy.visit('/user-management');
+cy.get('input[type="checkbox"]').slice(0, 2).check();
+cy.contains('Bulk Edit').click();
+});
+it('should sequentially enable downstream fields as selections are made', () => {
+// Check initial state: dependent location fields must be locked/disabled
+cy.get('[data-testid="district-dropdown"]').should('have.attr', 'disabled');
+cy.get('[data-testid="block-dropdown"]').should('have.attr', 'disabled');
+cy.get('[data-testid="village-dropdown"]').should('have.attr', 'disabled');
+// Step 1: Select State
+cy.get('[data-testid="state-dropdown"]').click();
+cy.contains('Maharashtra').click();
+cy.wait('@getDistricts');
+// Verify District is now unlocked, while further downstream fields remain locked
+cy.get('[data-testid="district-dropdown"]').should('not.have.attr', 'disabled');
+cy.get('[data-testid="block-dropdown"]').should('have.attr', 'disabled');
+// Step 2: Select District
+cy.get('[data-testid="district-dropdown"]').click();
+cy.contains('Pune').click();
+cy.wait('@getBlocks');
+// Verify Block is now unlocked, while Village remains locked
+cy.get('[data-testid="block-dropdown"]').should('not.have.attr', 'disabled');
+cy.get('[data-testid="village-dropdown"]').should('have.attr', 'disabled');
+// Step 3: Select Block
+cy.get('[data-testid="block-dropdown"]').click();
+cy.contains('Haveli').click();
+cy.wait('@getVillages');
+
+// Verify Village field is unlocked
+cy.get('[data-testid="village-dropdown"]').should('not.have.attr', 'disabled');
+// Step 4: Select Village
+cy.get('[data-testid="village-dropdown"]').click();
+cy.contains('Wagholi').click();
+// Verify form submission button becomes active after completing the chain
+cy.get('button').contains('Bulk Update Users').should('not.be.disabled');
+});
+});
+
+​
+​
+
+Page Title and Context
+●​ Title: Create and Manage Cohort.
+
+●​ Sub-text: Manage cohorts and cohort users.
+●​ Breadcrumb: User Cohorts > CFL Torps.
+●​ Red Arrow: Indicates the back navigation action.
+
+Cohort Details Section
+●​ Cohort Name: Text input box currently showing "CFL Torps".
+●​ Save Cohort Name: Button to apply and save changes made to the title.
+●​ Archive Cohort: Button to deactivate or hide the cohort from active views.
+●​ Cohort Users: Label with a blue measurement badge reading "88 Hug × 13 Hug"
+indicating UI spacing constraints.
+
+Filters and Controls
+●​ Search Trainers: Input field to filter users by text lookup.
+●​ Role Dropdown: Select menu to filter users by administrative permissions (e.g.,
+Admin).
+●​ Status Dropdown: Filter to view active or inactive users.
+●​ State & District Dropdowns: Regional location filters to narrow down the user list.
+
+Bulk and Individual Actions
+●​ Bulk Selection: "Select all (233)" and "Deselect all" links manage mass row
+actions.
+●​ Group Actions: Global controls to "Add to Cohort" or "Remove from Cohort" for
+selected rows.
+●​ Actions Dropdown: Per-row menu offering individual options like "Add to Cohort"
+and "Remove from Cohort".
+
+Data Table Columns
+●​ Checkbox: Toggles selection for individual user rows.
+●​ First Name / Last Name: Identifies the user (e.g., Priya Kadam).
+●​ Date Joined: Format showing registration dates (e.g., 01-01-2026).
+
+●​ Role: Shows the user's specific access level (e.g., Admin).
+●​ Contact Number / Email: Direct contact information for the cohort member.
+●​ Status: Visual indicator badge showing user state (e.g., Green "Active").
+
+Pagination Footer
+●​ Total Items: Displays the total count of items in the current view (Total Items: 6).
+●​ Rows Per Page: Dropdown configured to show 10 entries simultaneously.
+●​ Page Navigation: Numeric links (1, 2, 3... 10) to switch between data pages.
+
+​
+​
+
+Option 1: Step-by-Step User Guide
+1. How to Modify and Save a Cohort Name
+●​ Click inside the Cohort Name text field.
+●​ Delete the existing text and enter your new name.
+●​ Click the blue Save Cohort Name button to apply the change.
+2. How to Filter the User List
+●​ Use the Search Trainers box to look up a specific user by name.
+●​ Click the Role, Status, State, or District dropdowns to isolate specific user
+segments.
+●​ Check or uncheck the options within those dropdowns to update the data table
+grid automatically.
+3. How to Execute Single-User Actions
+●​ Locate the target user row in the table grid.
+●​ Navigate to the rightmost column labeled Actions.
+●​ Click the Select Action dropdown menu for that specific row.
+●​ Select either Add to Cohort or Remove from Cohort to update that individual.
+4. How to Execute Bulk-User Actions
+
+●​ Check the individual boxes next to multiple users, or click Select all (233).
+●​ Look to the top-right of the table for the Group Actions section.
+●​ Click the green Add to Cohort link or the red Remove from Cohort link to update
+all selected entries at once.
+5. How to Archive a Cohort
+●​ Ensure all current management tasks are completed.
+●​ Click the red outline Archive Cohort button in the top right corner.
+●​ Confirm the action if a secondary pop-up warning appears.
+
+Option 2: Functional Test Case Suite
+Test Case
+
+Feature /
+
+ID
+
+Element
+
+Test Objective
+
+Expected Result
+
+TC-001
+
+Back Arrow
+
+Verify back
+
+Clicking the back arrow returns the user to
+
+Link
+
+navigation
+
+the previous directory page.
+
+functionality.
+TC-002
+
+Cohort Name
+
+Verify text
+
+Field accepts alphanumeric characters
+
+Input
+
+modification
+
+and special symbols up to character limits.
+
+constraints.
+TC-003
+
+TC-004
+
+Save Cohort
+
+Verify database
+
+Clicking "Save Cohort Name" locks in
+
+Button
+
+updating.
+
+changes and triggers a success message.
+
+Archive Button
+
+Verify cohort state
+
+Clicking "Archive Cohort" flags the cohort
+
+modification.
+
+as inactive and removes it from main
+views.
+
+TC-005
+
+Search Field
+
+Verify real-time list
+
+Typing a name (e.g., "Priya") immediately
+
+filtering.
+
+isolates matching rows in the table.
+
+TC-006
+
+TC-007
+
+TC-008
+
+Multi-Select
+
+Verify filter layering
+
+Selecting "Admin" + "Active" combines
+
+Dropdowns
+
+logic.
+
+filters to show only active administrators.
+
+Select All
+
+Verify mass row
+
+Clicking "Select all" highlights every
+
+Controls
+
+selection behavior.
+
+checkbox across all table pages.
+
+Group Actions
+
+Verify multi-row state
+
+Triggering a group action successfully
+
+Links
+
+updates.
+
+updates all selected user rows
+simultaneously.
+
+TC-009
+
+TC-010
+
+Individual
+
+Verify row-isolated
+
+Triggering a menu action applies the state
+
+Action Menu
+
+behavior.
+
+change strictly to that single row.
+
+Pagination
+
+Verify table
+
+Clicking page "2" or changing rows per
+
+Controls
+
+navigation and limits.
+
+page alters visible table data correctly.
+
+convert this suite into detailed Gherkin syntax (Given/When/Then) or generate mock
+automation code templates for these tests.
+
+Detailed Gherkin Feature Files
+Feature: Cohort Identity Management
+
+gherkin
+Scenario: Successfully modify and save a cohort name
+Given the user is on the "Create and Manage Cohort" page
+And the cohort name field currently displays "CFL Torps"
+When the user updates the cohort name field to "Updated CFL Cohort"
+And the user clicks the "Save Cohort Name" button
+Then the system should save the new name "Updated CFL Cohort"
+And a confirmation message "Cohort name updated successfully" should appear
+Scenario: Archive an existing cohort
+Given the user is on the "Create and Manage Cohort" page
+When the user clicks the "Archive Cohort" button
+And the user confirms the structural archive warning dialog
+Then the cohort status should update to "Archived"
+And the user should be redirected back to the "User Cohorts" directory
+Use code with caution.
+
+Feature: Table Filtering and Search
+
+gherkin
+Scenario: Filter the user table by name search
+Given the user is on the "Create and Manage Cohort" page
+And the user table displays 6 total items
+When the user enters "Priya" into the "Search Trainers" input field
+Then the table rows should instantly update
+And all visible rows should contain "Priya" in the First Name column
+Scenario: Apply compound filters using Role and Status dropdowns
+Given the user is on the "Create and Manage Cohort" page
+When the user clicks the "Role" dropdown filter
+And the user checks the "Admin" option checkbox
+And the user clicks the "Status" dropdown filter
+And the user checks the "Active" option checkbox
+Then the table should reload data matching both criteria
+And every visible row must display "Admin" under Role and "Active" under Status
+Use code with caution.
+
+Feature: Individual and Bulk Action Processing
+
+gherkin
+Scenario: Execute single user removal from cohort via inline actions
+Given the user is on the "Create and Manage Cohort" page
+And the user locates the row for "Priya Kadam" with Email "priya.kadam@swadhaar.org"
+When the user clicks the "Select Action" dropdown in that specific row
+And the user selects the "Remove from Cohort" option
+Then the row for "priya.kadam@swadhaar.org" should be removed from the grid
+And the total items counter should decrement from 6 to 5
+Scenario: Execute bulk addition to cohort using select all
+Given the user is on the "Create and Manage Cohort" page
+And the table header displays "2 items selected"
+When the user clicks the "Select all (233)" action link
+Then all 233 user checkboxes across all pagination pages should be selected
+When the user clicks the "Add to Cohort" link under Group Actions
+Then a processing overlay should display the bulk update progress
+And a success notification should confirm 233 users were processed
+Use code with caution.
+
+Playwright TypeScript Automation Templates
+typescript
+
+import { test, expect } from '@playwright/test';
+test.describe('Cohort Management Suite', () => {
+test.beforeEach(async ({ page }) => {
+// Navigate to the target cohort page path
+await page.goto('/cohorts/manage/cfl-torps');
+});
+test('TC-003: Should save updated cohort name', async ({ page }) => {
+const nameInput = page.locator('input[placeholder*="Cohort Name"]');
+const saveButton = page.locator('button:has-text("Save Cohort Name")');
+await nameInput.fill('Updated CFL Cohort');
+await saveButton.click();
+// Validate value persistence or success toast presence
+await expect(nameInput).toHaveValue('Updated CFL Cohort');
+});
+test('TC-005: Should filter data table via search input', async ({ page }) => {
+const searchInput = page.locator('input[placeholder*="Search Trainers"]');
+const tableRows = page.locator('table tbody tr');
+await searchInput.fill('Priya');
+await page.waitForResponse(response => response.url().includes('/api/trainers') &&
+response.status() === 200);
+// Validate that visible items match criteria
+const count = await tableRows.count();
+for (let i = 0; i < count; i++) {
+await expect(tableRows.nth(i)).toContainText('Priya');
+}
+});
+test('TC-008: Should perform bulk action on selected users', async ({ page }) => {
+const selectAllLink = page.locator('text=Select all (233)');
+const groupAddAction = page.locator('text=Add to Cohort').first();
+const batchToast = page.locator('.toast-success');
+await selectAllLink.click();
+await groupAddAction.click();
+await expect(batchToast).toBeVisible();
+await expect(batchToast).toContainText('233 users processed successfully');
+});
+
+test('TC-009: Should trigger contextual row action menu items', async ({ page }) => {
+// Target the first inline record row's interactive select container
+const firstRowActionMenu = page.locator('table tbody tr').first().locator('text=Select Action');
+const removeOption = page.locator('text=Remove from Cohort');
+await firstRowActionMenu.click();
+await removeOption.click();
+// Verify row removal confirmation or counter decrement
+await expect(page.locator('text=Total Items: 5')).toBeVisible();
+});
+});
+
+​
+​
+​
+​
+​
+When users
+
+Added, UI Elements
+
+●​ User Badges Container: A large, multi-row container block is now visible directly
+under the Cohort Users section title.
+●​ Individual User Badges: 14 removable rectangular chips displaying the name
+Priya Kadam are rendered in the container.
+●​ Removal Icons: Each individual user badge contains a red circular close/cross
+icon (
+●​ ) on its right side.
+
+UI and Functionality Breakdown
+1. Selected Cohort Users Section (New)
+●​ UI: A grid of horizontal pills representing currently staged or added cohort
+members.
+●​ Functionality: Provides immediate visual confirmation of users currently assigned
+to this specific cohort. Clicking the red cross icon removes that specific user from
+the selection container instantly.
+
+2. Group Action Dynamic Linking
+●​ UI: "Add to Cohort" (blue link text) and "Remove from Cohort" (red link text) sit
+under Group Actions.
+●​ Functionality: Clicking these links processes any checked table rows
+downstream. When "Add to Cohort" is executed, selected table entities are
+pushed up into the Cohort Users badge container.
+
+Step-by-Step User Guide (Updated Workflow)
+1. Adding Multiple Users to a Cohort Container
+●​ Check individual checkboxes next to rows in the main data table, or click the
+Select all (233) link.
+●​ Locate the Group Actions section on the right side above the table header.
+●​ Click the blue Add to Cohort action text link.
+●​ Verify that new user pills containing the member names appear inside the upper
+Cohort Users grid.
+2. Removing Selected Users directly from the Badge Section
+●​ Scan the Cohort Users badge container at the top of the interface.
+●​ Locate the user badge you want to delete (e.g., a specific Priya Kadam pill).
+●​ Click the red circular cross icon (
+●​ ) located on the right edge of that specific user badge.
+●​ The badge will disappear immediately, updating the staging view before saving.
+
+Functional Test Case Suite (Newly Added Features)
+Test Case
+
+Feature /
+
+ID
+
+Element
+
+Test Objective
+
+Expected Result
+
+TC-011
+
+TC-012
+
+User Badge
+
+Verify correct container
+
+Executing "Add to Cohort" successfully
+
+Display
+
+rendering upon user
+
+populates user capsules in the upper
+
+addition.
+
+section.
+
+Verify inline removal via
+
+Clicking the cross icon instantly deletes
+
+Individual
+Badge Delete
+
+the red cross button (
+
+that specific pill from the upper grid.
+
+).
+TC-013
+
+TC-014
+
+Badge
+
+Verify table list state
+
+Removing a badge does not
+
+Counter Sync
+
+doesn't break upon chip
+
+automatically delete or modify the user's
+
+deletion.
+
+base record in the main table.
+
+Duplication
+
+Verify identical users
+
+Attempting to add an already displayed
+
+Prevention
+
+cannot be added
+
+user block fails or skips to prevent
+
+multiple times.
+
+duplication.
+
+​
+​
+​
+Scenario: Successfully populate user badges upon bulk addition
+Given the user has selected 14 rows from the data table
+When the user clicks the "Add to Cohort" link under Group Actions
+Then a multi-row container should display under "Cohort Users"
+And exactly 14 individual "Priya Kadam" user badges should be visible
+And each badge must display a red circular cross icon on its right edge
+Scenario: Remove a staged user directly from the badge container
+Given the "Cohort Users" container displays multiple user badges
+When the user clicks the red cross icon on a specific "Priya Kadam" badge
+Then that specific user badge should immediately disappear from the container
+And all other user badges in the container must remain unchanged
+Scenario: Validate state persistence after badge removal
+Given the user removes a "Priya Kadam" badge from the upper container
+Then the corresponding user record in the main data table below must not be deleted
+And the user's status in the data table row should still display "Active"
+Scenario: Prevent duplicate user badge addition
+
+Given the user badge for "Priya Kadam (priya.kadam@swadhaar.org)" is already present in
+the upper container
+And the user checks the checkbox for "Priya Kadam" in the main data table
+When the user clicks the "Add to Cohort" link under Group Actions
+Then the system should not append a duplicate badge for that user
+And a warning notification "User is already added to the cohort" should be displayed
+
+​
+​
+UI and functionality of cohort t6ab from user management page​
+​
+
+UI and Functionality Breakdown
+Header & Top Navigation
+●​ Page Title & Subtext: Displays User Management with the subtitle "Manage your
+users and user cohorts".
+
+●​ Tabs Indicator: Two toggle buttons switch views between Users (10) and Cohorts
+(2). The "Cohorts" tab is currently active, displaying the cohort management
+table.
+●​ Global Action Button: A dark blue + Create Cohort button in the top right redirects
+the user to the blank cohort creation screen.
+Table Filters & Selection
+●​ Search Cohorts: Text input box to filter down the table entries by cohort title.
+●​ Status Dropdown: Menu to isolate rows based on checked statuses (Active or
+Inactive).
+●​ Mass Selection Links: Displays current manual row selections ("2 items
+selected") alongside quick links for Select all (12) and Deselect all.
+●​ Group Actions: Global dynamic link text Enrol to Course applies a course
+assignment rule across all checked rows simultaneously.
+Data Grid Columns
+●​ Selection Checkbox: Toggles inclusion for targeted bulk operations.
+●​ Cohort Name: Title string representing the specific grouping (e.g., "CFL Torpa").
+●​ Users: Numerical metric indicating total populated members assigned inside that
+cohort (e.g., "20").
+●​ Date Created: Timestamp marker for audit tracks formatted as DD-MM-YYYY
+(e.g., "01-01-2026").
+●​ Created By: Administrative author identity string (e.g., "Priya Kadam").
+●​ Status: Dynamic lifecycle badge (e.g., green Active marker).
+●​ Actions Dropdown: Row-isolated operation matrix containing three options:
+Manage Cohort, Enrol to Course, and red text Archive Cohort.
+Footer Pagination
+●​ Total Items: Overall database query metric count matching active filter rules
+("Total Items: 6").
+
+●​ Rows Per Page: Numerical limit configuration dropdown currently set to look at
+"10" rows maximum.
+●​ Page Index Matrix: Navigational pagination index sequence (1, 2, 3... 10) to
+browse split sets.
+
+Step-by-Step User Guide
+1. How to Initiate a New Cohort
+●​ Locate the top right section of the main dashboard interface.
+●​ Click the dark blue + Create Cohort button.
+●​ Complete the configuration form on the subsequent page layout.
+2. How to Manage a Single Cohort Record Inline
+●​ Identify your target cohort row from the list (e.g., "CFL Torpa").
+●​ Hover to the rightmost column and click the Select Action dropdown toggle.
+●​ Click Manage Cohort to update names and handle badge users, or click the red
+Archive Cohort to terminate visibility.
+3. How to Bulk Enrol Cohorts into a Course
+●​ Select specific cohort records using individual left checkboxes, or click Select all
+(12).
+●​ Locate the Group Actions text string header above the right data grid layout.
+●​ Click the blue Enrol to Course text link to open the mass assignment screen.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Cohort List Navigation and Filtering
+
+gherkin
+Scenario: Toggle viewing perspective from cohorts to users list
+Given the user is viewing the "User Management" master page
+And the "Cohorts" tab indicator is currently highlighted active
+When the user clicks on the "Users 10" tab element
+Then the active layout should switch views to reveal the Users list data grid
+
+Scenario: Filter cohort data grid via name search string
+Given the user is on the Cohorts tab within the User Management dashboard
+When the user types "Torpa" inside the "Search Cohorts" filter field
+Then the system should isolate the data rows instantaneously
+And every visible row item must display "CFL Torpa" in the Cohort Name column
+Use code with caution.
+
+Feature: Cohort Group Actions and Record Modifications
+
+gherkin
+Scenario: Trigger bulk enrolment for multiple checked cohorts
+Given the data grid header displays the status string "2 items selected"
+When the user clicks the "Enrol to Course" link under the Group Actions area
+Then the system should load the Course Enrollment wizard configuration screen
+And the wizard must target the selected cohort groups automatically
+Scenario: Execute inline cohort management workflow
+Given the user opens the "Select Action" dropdown on the first "CFL Torpa" row
+When the user selects the "Manage Cohort" options choice link
+Then the app must redirect the browser to the "Create and Manage Cohort" layout page
+
+​
+​
+
+UI and Functionality Breakdown
+1. Main Table Interface (Role Management)
+
+●​ Header Section: Labeled Role Management with the subtext "Manage user
+roles". A dark blue primary action button + Add Role sits on the right side.
+●​ Search Bar: Text input field containing a search icon used to dynamically filter
+role names in the list.
+●​ Selection & Bulk Controls Bar: Displays selection metrics and multi-record
+operation commands:
+○​ Selection Count Indicator: Displays current selections (e.g., "2 items
+selected").
+○​ Mass Selection Links: Features quick options to Select all (10) or Deselect
+all.
+○​ Group Actions: Offers batch toggle modifications via Enable all and
+Disable all text links.
+●​ Data Grid Columns:
+○​ Checkbox: Toggles individual row selection.
+○​ Title: Names of access groups (e.g., Admin, District Incharge, Trainer).
+○​ Reporting to: Structural hierarchy paths showing who supervises whom.
+○​ Created On / Last Modified: Tracking timestamps formatted as
+DD-MM-YYYY.
+○​ Status Toggle: A modern graphical slide switch showing an active state
+(green switch) or an inactive state.
+○​ Actions Menu: Per-row Select Action dropdown menus. For selected
+entries, this expands to display options like Edit Role, Disable Role, and a
+red destructive Archive Role link.
+
+2. Yellow Note (Functional Logic & Constraints)
+●​ Multi-Role Conditional Flow: The yellow note specifies that when multiple rows
+are checked, group action logic updates to support collective modifications like
+modify status and Archive (soft delete).
+3. "Add/Edit Role" Modal Dialog Frame (Right Overlay)
+
+●​ Header: Dynamic context title Add/Edit Role equipped with a standard
+cancellation close cross anchor (
+●​ ).
+●​ Input Controls:
+○​ Role Title *: Mandatory text field with a placeholder prompt ("Enter Role
+Name").
+○​ Choose Role Permissions *: Multi-select dropdown field indicated by a
+blue "D" marker. Features hint chips showing assigned security
+parameters (e.g., Read Users, Edit Users).
+○​ Reporting to *: Mandatory hierarchy assignment dropdown field.
+Predefined parent associations appear in gray (e.g., Superadmin, Admin).
+○​ Rule Status *: Radio toggle option switching system states explicitly
+between Disabled and Enabled.
+●​ Footer Actions: Contains a clear-form Clear link button and a dark blue
+confirmation Save Role button.
+
+Step-by-Step User Guide
+1. Initializing and Form-Configuring a New Security Role
+●​ Navigate onto the main dashboard pane and click the dark blue + Add Role
+button to bring up the side window modal.
+●​ Click inside the Role Title field and type a descriptive identifier.
+●​ Click the Choose Role Permissions multi-select dropdown and check the security
+capabilities this role should have (e.g., Read Users).
+●​ Use the Reporting to menu to choose who this new role will report to in the
+organizational hierarchy.
+●​ Set the Rule Status switch to Enabled, then click the blue Save Role button to
+create it.
+2. Performing Multi-Row Status Updates and Archiving
+
+●​ Check the boxes next to individual roles in the data table, or click Select all (10)
+to select all rows at once.
+●​ To update statuses across all selected records instantly, navigate to the Group
+Actions section and click Enable all or Disable all.
+●​ To soft-delete all selected roles at once, follow the path indicated by the yellow
+note: use the multi-role action tool to click Archive (soft delete).
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Dynamic Form Submission and Field Validation
+
+gherkin
+Scenario: Successfully validate mandatory field markers during role configuration
+Given the admin user has launched the "Add/Edit Role" overlay frame container
+And the admin leaves the mandatory field "Role Title" completely blank
+When the user clicks the dark blue "Save Role" form submission button
+Then the action must halt immediately to prevent invalid data transmission
+And an inline validation warning alert message must display next to the missing field
+Scenario: Clear workspace inputs using the inline clear control option
+Given the admin has entered data across fields in the "Add/Edit Role" form layout
+When the user clicks the "Clear" text link button located in the footer area
+Then every custom entry field inside the panel must reset to its blank default state
+Use code with caution.
+
+Feature: Data Grid List Filtering and Bulk State Control
+
+gherkin
+Scenario: Search and filter the roles table by title keyword
+Given the admin is viewing the main "Role Management" dashboard data list
+When the user enters the search string "Incharge" inside the filtered search bar field
+Then the table rows should immediately filter to display matching records
+And only rows containing "District Incharge" or "Sub District Incharge" must remain visible
+Scenario: Execute mass status adjustments via Group Action triggers
+Given the admin selects multiple role entries, displaying the indicator "2 items selected"
+When the user clicks the "Disable all" link under the Group Actions area
+Then the system must process a background batch update command
+And the graphical status sliders for all selected rows must switch to the disabled state
+Use code with caution.
+
+Feature: Contextual Deletion and Archiving Logic
+
+gherkin
+Scenario: Archive multiple roles simultaneously using multi-select workflow
+Given the admin checks multiple role rows to trigger the conditional multi-role logic
+When the user executes the "Archive (soft delete)" operation from the group controls
+Then the system must soft-delete all targeted role records simultaneously
+And the archived records must be hidden from the active management view without being
+permanently deleted from the database
+
+UI and Functionality Breakdown
+1. Content Library Main Dashboard (Left Workspace)
+●​ Header Section: Displays Content Library with the subtitle "Manage your
+uploaded content". A dark blue primary button + Upload Content is positioned at
+the top right.
+●​ Search and Filters:
+○​ Search Input: Text bar to filter files by name.
+○​ Status Filter: Dropdown list to isolate files by state (Active or Inactive).
+○​ Type Filter: Dropdown menu to filter content by format profile (Video,
+Image, Assessment, etc.).
+
+●​ Mass Selection Options: Displays selection states (e.g., "2 items selected") with
+links to Select all (150) and Deselect all.
+●​ Group Actions Sub-menu: Contains batch status change operations: Move to
+Drafts, Move to Review, and Duplicate.
+●​ Data Columns: Features standard sorting properties: Title, Type, Date Created,
+Created By, Status (green badge), and a Actions dropdown selector.
+2. Left Yellow Note Constraints (Bulk Actions & Filters)
+●​ Dynamic Operations: Selecting multiple content rows triggers group actions: Bulk
+Duplicate and Archive (Soft Delete).
+●​ Enhanced Filtering: Filter logic updates to support multi-select for Creator profiles
+and expanded status options (Published, In Review, and Drafts).
+3. "Upload Content" Overlay Modal Drawer (Right Workspace)
+●​ Header Frame: Form modal titled Upload Content with a standard close icon (
+●​ ).
+●​ Content Type Selector *: A mandatory dropdown field to classify the incoming
+asset.
+●​ Drag & Drop File Upload Area: A dotted bounding target dropzone area
+containing an upload line icon and a blue Browse hyperlink trigger.
+●​ File Constraint Information Text:
+○​ Supported formats: mp3, wav, pdf, mp4, webm, epub, youtube, h5p, and
+html zip files.
+○​ Maximum size constraint: 150 MB.
+○​ Render guidelines: Note specifying that PDF and HTML files may take up
+to a minute to generate system preview updates.
+●​ Workspace Action Buttons: Features a light grey Clear Filter function and a dark
+blue Upload submission button.
+4. Right Yellow Note Constraints (System Integration & Asset Creation)
+
+●​ LMS Platform Sync: Clicking to add an Assessment, Video, or Image triggers
+integration scripts that open the internal Sunbird LMS system interface to attach
+the selected asset.
+●​ New Asset Mapping: Images uploaded through this panel must be appended as
+a new custom content category within the active ecosystem.
+
+Step-by-Step User Guide
+1. Managing Material Upload Configurations
+●​ Click the dark blue + Upload Content button on the main dashboard to open the
+file upload modal.
+●​ Expand the Content Type dropdown and choose your asset category. If you
+choose Assessment, Video, or Image, the system will sync with the Sunbird LMS
+framework to attach the asset.
+●​ Drag your file into the dotted dropzone or click Browse to find it manually (ensure
+the file is under 150 MB and uses an approved extension like .mp4 or .pdf).
+●​ Click the dark blue Upload button to save the new item to your Content Library.
+2. Executing Multi-Item Batch Management
+●​ Check the checkboxes next to the items you want to modify, or click Select all
+(150) to select everything.
+●​ To update their workflow states at once, navigate to the Group Actions section
+and click Move to Drafts or Move to Review.
+●​ To clone or soft-delete all selected rows simultaneously, use the multi-select tools
+to click Duplicate or Archive.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Dynamic File Upload Validation and LMS System Sync
+
+gherkin
+Scenario: Prevent file upload when asset dimensions exceed the maximum size constraint
+Given the administrator has opened the "Upload Content" modal container
+
+And the user selects a file that exceeds the maximum size limit of 150 MB
+When the user drops the file onto the drag-and-drop target upload area
+Then the system must intercept the upload request and halt data transmission
+And a red validation error message "File size cannot exceed 150 MB" must display
+Scenario: Route asset creation requests to Sunbird LMS during setup
+Given the administrator is configuring an asset inside the upload form
+When the user selects "Assessment" from the "Content Type" dropdown selector field
+Then the platform must initialize integration sync protocols with Sunbird LMS
+And the Sunbird asset attachment interface must render within the active workspace
+Use code with caution.
+
+Feature: Data Grid List Filtering and Batch Management
+
+gherkin
+Scenario: Filter the content library table using multiple criteria at once
+Given the admin is viewing the master "Content Library" dashboard list view
+When the user checks multiple creator names in the "Creator" filter dropdown
+And the user selects "Published" from the status criteria options
+Then the table rows must immediately refresh to show only matching records
+And all visible rows must match the selected creator and status criteria
+Scenario: Execute mass status updates using bulk action controls
+Given the administrator has checked multiple content rows in the table
+And the selection indicator displays the text string "2 items selected"
+When the user clicks the "Move to Review" link in the Group Actions bar
+Then the system must process a background batch update command
+And the status badges for all selected rows must switch to "In Review"
+Use code with caution.
+
+Feature: Contextual Duplication and Soft-Deletion Operations
+
+gherkin
+Scenario: Bulk duplicate multiple selected library assets simultaneously
+Given the admin selects multiple content items to trigger the bulk action rules
+When the user clicks the dynamic "Duplicate" option from the group actions bar
+Then the system must copy the selected asset records in the database
+And the table list must refresh to show the new duplicate rows marked as "Copy"
+
+​
+​
+
+UI and Functionality Breakdown
+1. Course Management Main Grid (Left Workspace)
+●​ Header Section: Labeled Course Management with a dark blue primary action
+button + Create Course in the upper right corner.
+●​ Filters: Includes dropdown menus to filter courses by Status and other contextual
+criteria.
+●​ Table Grid Columns: Displays course details including Title, Type, Created On,
+Created By, Status (green badge), and an Actions dropdown menu.
+●​ Inline Action Menu: Expanding the row dropdown shows contextual options:
+Manage Course, Enrol Trainer Group, and a red destructive Archive Course link.
+2. Left Yellow Note (Bulk Actions & Filters)
+●​ Dynamic Operations: Selecting multiple checkboxes updates group controls to
+feature Bulk Duplicate and Archive (Soft Delete).
+●​ Enhanced Filtering: Filter menus update to support multi-select options for
+Creator and expand status parameters (Published, In Review, Drafts).
+3. "Enrol Trainer Group to Course" Modal (Center Overlay)
+●​ Trigger Mechanism: Opened by selecting a row's inline action menu or via the
+group action links.
+●​ Input Fields: Includes a mandatory Select Course * lookup dropdown and a
+Trainer Group * multi-select dropdown.
+
+●​ Form Submission: A dark blue Enrol Product confirmation button commits the
+assignment rules.
+4. Center Yellow Note (Enrolment Routing Constraints)
+●​ Workspace Synchronization: When the Enrol Trainer Group to Course button is
+clicked inside the course builder interface, the modal defaults its course selection
+state to focus on the active course workspace.
+5. Sunbird LMS Content Workspace (Right Workspace)
+●​ Form Header: Displays the active content workspace titled Book with global
+control buttons Preview, Save as Draft, and Submit for Review.
+●​ Interactive Panel Components: Includes a nested navigation outline menu tree
+(e.g., Book
+●​ Item 1), data collection input boxes for Name * and Description, an rich-text
+editor for Instructions, and options like Shuffle Questions.
+●​ Bottom Control Bar: Contains operational action links to Add Peer Reviewer and
+Close Workspace.
+6. Right Yellow Note (LMS Creation Pipeline)
+●​ Platform Redirection: Clicking + Create Course bypasses native forms and
+redirects the browser to the embedded Sunbird LMS interface. This initializes a
+new course asset workspace under unified administrative focus.
+
+Step-by-Step User Guide
+1. Initializing New Course Materials via Sunbird LMS
+●​ Navigate to the Course Management dashboard.
+●​ Click the dark blue + Create Course button in the top right.
+●​ The system will redirect you to the Sunbird LMS workspace layout.
+●​ Enter your course parameters in the Name and Description fields, and use the
+rich-text tool to configure user Instructions.
+
+●​ Click Save as Draft to capture updates, or click Submit for Review to advance the
+course through publishing approval steps.
+2. Mass-Assigning Trainer Teams to Active Courses
+●​ Locate your target course in the main table list.
+●​ Click its Select Action dropdown in the rightmost column, then select Enrol
+Trainer Group.
+●​ In the pop-up modal, verify or select your target course, then expand the Trainer
+Group field to check the boxes next to your target teams.
+●​ Click Enrol Product to apply the assignment rules to those groups.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Role-Based LMS Integration Workspace Routing
+
+gherkin
+Scenario: Redirect course creation requests to the Sunbird LMS platform interface
+Given the administrator is looking at the master "Course Management" grid view
+When the user clicks the dark blue "+ Create Course" primary action button
+Then the platform should redirect the active browser view to the Sunbird LMS panel
+And a clean workspace layout should open with the editing focus locked on the course asset field
+Use code with caution.
+
+Feature: Dynamic Mass Selection and Group Status Transitions
+
+gherkin
+Scenario: Toggle contextual soft-delete options when selecting multiple items
+Given the admin is viewing the populated course management data table list
+When the user checks multiple course checkboxes to select more than one row
+Then the "Group Actions" context panel links must update dynamically
+And the selection bar must display "Bulk Duplicate" and "Archive (Soft Delete)" options
+Use code with caution.
+
+Feature: Contextual Workspace Enrolment Pre-population
+
+gherkin
+Scenario: Auto-select active course context inside the enrolment modal
+Given the user is working inside the course builder panel workspace
+When the user clicks the "Enrol Trainer Group to Course" action link
+Then the configuration modal overlay should open automatically
+
+And the "Select Course" dropdown must be pre-populated with the active course context
+
+UI and Functionality Breakdown
+1. Notification Management Dashboard (Active Notifications Tab - Left View)
+●​ Header & View Layout: Features the page title Notification Management with the
+subtitle "Manage your notifications". It uses a tab bar containing Active
+Notifications (currently selected) and Notification Templates. A primary dark blue
+button + Send Notification resides on the right side.
+●​ Filters: Includes dropdown menus to filter notifications by Status and other
+system properties.
+●​ Selection & Bulk Controls Bar: Displays selection indicators ("2 items selected")
+alongside quick links for Select all (12) and Deselect all.
+●​ Group Actions Sub-menu: Offers mass status alteration links: Move to Drafts and
+Disable.
+●​ Data Grid Columns: Displays standard notification metrics: Notification ID,
+Notification Type, Template, Sent On, Status (green "Active" badge), and an
+Actions dropdown menu.
+●​ Inline Actions Menu: Expanding an individual row dropdown presents options like
+Edit Notification, Disable Notification, and a red destructive Archive Notification
+link.
+2. Left Yellow Note Constraints (Bulk Operations & Soft-Deletion)
+
+●​ Dynamic Actions: Selecting multiple checkboxes updates group controls to
+feature collective status updates and Archive (Soft Delete) operations.
+3. "Send/Edit Notification" Modal Drawer (Center Overlay)
+●​ Header: Dynamic dialog window labeled Send/Edit Notification featuring a corner
+dismissal close icon (
+●​ ).
+●​ Target Group Fields *: Contains mandatory dropdown selections including Target
+Users * and Template * (to select predefined formatting layouts).
+●​ Trigger Definition Field *: A mandatory Notification Trigger Time * field configured
+via radio selection toggles between Send Now or Schedule (which unlocks data
+inputs for date and time parameters).
+●​ Message Details: Displays a read-only Message text canvas preview area that
+automatically reflects the template text populated by the selection dropdown.
+●​ Footer Actions: Contains a clear-form Clear link button and a dark blue Send
+Notification confirmation button.
+4. Notification Templates Dashboard (Right View)
+●​ Header & View Switch: Accessed by clicking the second tab option labeled
+Notification Templates. The primary button shifts its text label to + Create
+Template.
+●​ Data Grid Columns: Displays template management columns: Template ID,
+Template Title, Notification Body, System Prototype, Status (green "Active"
+badge), and an Actions dropdown menu.
+●​ Inline Actions Menu: Individual row options map to actions like Edit Template,
+Disable Template, and a red Archive Template link.
+5. "Create/Edit Notification Template" Modal Drawer (Far Right Overlay)
+●​ Header: Dialog panel titled Create/Edit Notification Template with a corner close
+anchor (
+
+●​ ).
+●​ Input Controls *: Features fields with validation asterisks: Template Title *,
+Notification Title *, and a multi-line text input box labeled Notification Body *.
+●​ Footer Actions: Includes a Clear option and a dark blue Save Template
+confirmation button.
+
+Step-by-Step User Guide
+1. Authoring and Deploying a Notification Transmission
+●​ Navigate onto the Notification Management dashboard page and verify that the
+Active Notifications tab is highlighted.
+●​ Click the dark blue + Send Notification button to open the configuration slide-out
+drawer.
+●​ Select your intended audience slice using the Target Users dropdown field list.
+●​ Choose a template structure from the Template dropdown menu; this will
+automatically fill the read-only Message field preview container below.
+●​ Set the Notification Trigger Time radio button option: select Send Now for
+immediate delivery, or select Schedule to enter your required date and time
+parameters.
+●​ Click the dark blue Send Notification button to finalize delivery processing.
+2. Building Preformatted Notification Templates
+●​ Click the Notification Templates view tab located at the top left area of the
+dashboard.
+●​ Click the dark blue primary button labeled + Create Template to open the creation
+overlay panel.
+●​ Enter configuration data into the mandatory Template Title, Notification Title, and
+Notification Body text input boxes.
+●​ Click the blue Save Template button to commit your changes and make the
+design selectable in the delivery drawer.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Dynamic Broadcast Targeting and Form Field Validation
+
+gherkin
+Scenario: Successfully restrict broadcast delivery submissions when mandatory parameters are
+missing
+Given the administrator has opened the "Send/Edit Notification" overlay drawer window
+And the user selects a audience tier from the "Target Users" dropdown field
+And the admin leaves the mandatory "Template" selection option completely blank
+When the user clicks the dark blue "Send Notification" confirmation button
+Then the system must intercept the command to prevent invalid transmission
+And an inline validation alert message "Template selection is required" must display
+Scenario: Unveil calendar configuration inputs when scheduling broadcasts for later delivery
+Given the admin user is working inside the "Send/Edit Notification" configuration drawer
+And the "Notification Trigger Time" configuration is set to its default option "Send Now"
+When the user changes the radio selection option to "Schedule"
+Then the platform layout should expand dynamically to display date and time fields
+And those specific scheduled time fields must match input validation constraints
+Use code with caution.
+
+Feature: Template Modification and Preview Synchronization
+
+gherkin
+Scenario: Auto-populate the read-only message canvas based on template selection changes
+Given the admin has launched the notification delivery configuration drawer panel
+When the user selects the "Welcome Announcement" profile from the "Template" dropdown menu
+Then the system must update the text area canvas container labeled "Message"
+And the preview text must display the exact string mapped to the "Welcome Announcement"
+record
+Use code with caution.
+
+Feature: Contextual Bulk Selection Actions and Status Toggling
+
+gherkin
+Scenario: Mass archive multiple notifications simultaneously
+Given the user checks multiple notification checkboxes, displaying the indicator "2 items selected"
+When the user clicks the dynamic "Archive (Soft Delete)" link from the Group Actions bar
+Then the system must run a background batch update command to soft-delete the records
+And the archived notification items must be removed from the active grid view immediately
+
+​
+​
+
+​
+​
+
+UI and Functionality Breakdown
+1. Page Header Section
+●​ Title: Labeled Metabase Analytics on the master workspace layer.
+●​ Sub-text: "Track crucial metrics and performance indicators" defines the page
+purpose.
+●​ Sidebar Integration: The analytics line chart icon in the left navigation sidebar is
+actively highlighted in dark blue, showing the user is inside this module.
+2. Embedded Metabase BI Portal Workspace (iframe Container)
+●​ Embedded Portal Banner: Features a light blue top menu bar with a central
+search tool box ("Search") and platform utilities on the right (+ Ask a question,
+Browse data, Settings, and Activity history icons).
+
+●​ Greeting & Welcome Banner: Displays a customized greeting header text string:
+"Hey there, Pankaj".
+●​ Staged Analytics Banner: Contains an information chip reading "Your team's
+most important dashboards go here. Pin dashboards or collections to save them
+space for everyone."
+●​ Automatic Table Discovery Row: Features four quick-link shortcut cards to
+instantly generate ad-hoc analytical explorations from internal database tables:
+○​ People table shortcut card.
+○​ Orders table shortcut card.
+○​ Products table shortcut card.
+○​ Reviews table shortcut card.
+●​ Our Analytics Container: A central placeholder zone with a grey illustration layer
+reading "Save dashboards, questions, and collections to 'Our analytics'" with a
+blue Browse all items routing link button.
+●​ Database Schema Indicator: A bottom panel strip displays a database icon
+marked with a sub-label tracking linked storage warehouses.
+3. Yellow Note Constraints (System Architecture & Embedded Flow)
+●​ iframe Integration Requirement: The yellow note specifies that this view embeds
+a complete Metabase Analytics iframe instance directly inside the admin panel
+layout framework.
+●​ Content Generation Rule: All performance charts, data graphs, and customized
+business intelligence reporting dashboards are created directly on the native
+Metabase engine portal, which then streams and renders them within this
+embedded interface container.
+
+Step-by-Step User Guide
+1. Accessing Platform Analytics via the Admin Dashboard
+●​ Locate the left-hand navigation sidebar panel on the administrator portal screen.
+
+●​ Click on the analytics line chart icon (positioned second from the bottom) to load
+the reporting suite.
+●​ Verify that the header reads Metabase Analytics and that your custom iframe
+dashboard workspace synchronizes and displays completely.
+2. Generating Quick Metrics Reports from Table Shortcuts
+●​ Scroll down to the Try these views based on your data shortcut section inside the
+embedded frame.
+●​ Choose a database schema target card based on your reporting goals (e.g., click
+on Check out your People table).
+●​ Review the automatically generated metrics summary charts and data trends
+calculated from that database table.
+3. Browsing Saved Core Team Dashboards
+●​ Look at the center area of the portal layout labeled Our Analytics.
+●​ Click the blue Browse all items hyperlink text button.
+●​ Select from your team's saved collections, customized data questions, or pinned
+performance metric boards to open full report sheets.
+
+Functional Test Case Suite & Gherkin Scenarios
+Feature: Secure Embedded iframe Asset Rendering
+
+gherkin
+Scenario: Successfully render the embedded Metabase dashboard iframe asset
+Given the admin supervisor "Pankaj" is logged into the master management dashboard
+When the user clicks on the "Metabase Analytics" icon option in the left navigation sidebar
+Then the platform layout frame must render the main analytics workspace structure
+And the system must successfully initialize and display the secure embedded Metabase iframe
+portal instance
+And the greeting message string inside the frame container must display "Hey there, Pankaj"
+Scenario: Gracefully handle communication timeouts from the embedded analytics portal
+Given the admin user navigates onto the master "Metabase Analytics" reporting tab view
+When the background authentication handshake or connection to the Metabase server times out
+Then the system must intercept the connection error cleanly within the active container frame
+
+And an inline notification message "Unable to securely load analytics data. Please reload." must
+display
+Use code with caution.
+
+Feature: Data Exploration Redirection and Shortcuts
+
+gherkin
+Scenario: Launch automated data metric explorations using table shortcut cards
+Given the embedded Metabase portal canvas has finished loading its UI elements
+When the user clicks on the "Check out your People table" quick exploration card shortcut
+Then the Metabase engine must process an automatic data discovery query in the background
+And the iframe view must update to display a generated data summary page for that table
+Use code with caution.
+
+Feature: Global Metabase Navigation Routing
+
+gherkin
+Scenario: Browse all saved team metric collections from the central portal hub
+Given the admin is looking at the core data placeholder block inside the analytics panel
+When the user clicks the blue "Browse all items" link button under the Our Analytics section
+Then the embedded portal page view must update to show the main collection directory
+And all shared dashboards and pinned data questions must be accessible to the user
+
+

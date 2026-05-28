@@ -11,8 +11,10 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { telemetryFactory } from '../utils/telemetry';
 import FullLayout from '@/components/layouts/FullLayout';
+import SwadhaarFullLayout from '@/swadhaar/components/layout/SwadhaarFullLayout';
 import { Experimental_CssVarsProvider as CssVarsProvider } from '@mui/material/styles';
 import customTheme from '../styles/customTheme';
+import swadhaarTheme from '../swadhaar/config/swadhaar-theme';
 import './../styles/style.css';
 import Head from 'next/head';
 
@@ -25,6 +27,7 @@ import { Role, TelemetryEventType, metaTags } from '@/utils/app.constant';
 import useSubmittedButtonStore from '@/utils/useSharedState';
 import RouteGuard from '@/components/RouteGuard';
 import TenantService from '@/services/TenantService';
+import { isSwadhaarChannel } from '@/services/DomainTenantService';
 
 //menu config
 import MenuWrapper from '../config/MenuWrapper';
@@ -121,6 +124,14 @@ function App({ Component, pageProps }: AppProps) {
     if (pageProps.noLayout) {
       return <Component {...pageProps} />;
     } else {
+      const isSwadhaar = isSwadhaarChannel();
+      if (isSwadhaar) {
+        return (
+          <SwadhaarFullLayout>
+            <Component {...pageProps} />
+          </SwadhaarFullLayout>
+        );
+      }
       return (
         <FullLayout>
           <Component {...pageProps} />
@@ -140,6 +151,9 @@ function App({ Component, pageProps }: AppProps) {
     })
   );
 
+  const isSwadhaarRoute = isSwadhaarChannel();
+  const activeTheme = isSwadhaarRoute ? swadhaarTheme : customTheme;
+
   return (
     <>
       <Head>
@@ -148,7 +162,7 @@ function App({ Component, pageProps }: AppProps) {
       <QueryClientProvider client={client}>
         <AuthProvider>
           {/* for dynamic menu */}
-          <CssVarsProvider theme={customTheme}>
+          <CssVarsProvider theme={activeTheme}>
             {/* <RouteGuard>{renderComponent()}</RouteGuard> */}
             <MenuWrapper>{renderComponent()}</MenuWrapper>
             <ToastContainer

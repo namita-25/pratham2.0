@@ -213,13 +213,20 @@ export const isSwadhaarChannel = (): boolean => {
   }
 
   try {
-    // Check current domain
+    // 1. Check URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('tenant') === 'swadhaar' || localStorage.getItem('dev_tenant') === 'swadhaar') {
+      localStorage.setItem('dev_tenant', 'swadhaar');
+      return true;
+    }
+
+    // 2. Check current domain
     const currentDomain = window.location.hostname.toLowerCase();
     if (currentDomain.includes('swadhaar')) {
       return true;
     }
 
-    // Try to get tenant config from localStorage (set during login)
+    // 3. Try to get tenant config from localStorage (set during login)
     const tenantDataStr = localStorage.getItem('tenantData');
     if (tenantDataStr) {
       try {
@@ -235,7 +242,7 @@ export const isSwadhaarChannel = (): boolean => {
       }
     }
 
-    // Check tenantId mapping (from tenantMapping.ts)
+    // 4. Check tenantId mapping (from tenantMapping.ts)
     const tenantId = localStorage.getItem('tenantId');
     if (tenantId === '35529b5d-526f-4da5-bc6e-64f740023d26') {
       return true; // Swadhaar tenant ID

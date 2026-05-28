@@ -25,7 +25,7 @@ import Loader from '../components/Loader';
 import MenuItem from '@mui/material/MenuItem';
 import config from '../../config.json';
 import { getUserId, login, getTenant } from '../services/LoginService';
-import { getTenantConfig, getTenantContentFilter, Tenant, TenantContentFilter } from '../services/DomainTenantService';
+import { getTenantConfig, getTenantContentFilter, Tenant, TenantContentFilter, isSwadhaarChannel } from '../services/DomainTenantService';
 import { serverSideTranslations } from 'next-i18next/serverSideTranslations';
 import { useRouter } from 'next/router';
 import { useTheme } from '@mui/material/styles';
@@ -728,10 +728,243 @@ const LoginPage = () => {
   );
 
   return (
-    <Box sx={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: dynamicStyles.backgroundColor || '#F5F5F5' }}>
-      {loading && (
-        <Loader showBackdrop={true} loadingText={t('COMMON.LOADING')} />
-      )}
+    isSwadhaarChannel() ? (
+      <Box 
+        sx={{ 
+          position: 'relative', 
+          height: '100vh', 
+          width: '100vw',
+          overflow: 'hidden', 
+          backgroundColor: '#EAEAEA', 
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        {loading && (
+          <Loader showBackdrop={true} loadingText={t('COMMON.LOADING')} />
+        )}
+        
+        <Card
+          sx={{
+            width: '100%',
+            maxWidth: '450px',
+            mx: 'auto',
+            borderRadius: '16px',
+            background: '#ffffff',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+            p: '40px 32px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          {/* Logo */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+            <img
+              src="/images/swadhar_logo.png"
+              alt="Swadhaar Logo"
+              style={{ width: '150px', height: 'auto', objectFit: 'contain' }}
+            />
+          </Box>
+
+          <Typography
+            sx={{
+              fontWeight: 700,
+              fontSize: '2rem',
+              color: '#1E293B',
+              mb: 1,
+              textAlign: 'center',
+            }}
+          >
+            Sign in
+          </Typography>
+
+          <Typography
+            sx={{
+              color: '#64748B',
+              mb: 4,
+              fontSize: '0.95rem',
+              textAlign: 'center',
+            }}
+          >
+            Welcome back to Swadhaar Admin Panel
+          </Typography>
+
+          <form onSubmit={handleFormSubmit} style={{ width: '100%' }}>
+            {/* Username */}
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: '#334155',
+                mb: '6px',
+                textAlign: 'left',
+              }}
+            >
+              Username
+            </Typography>
+            <TextField
+              fullWidth
+              id="username"
+              placeholder="Enter username"
+              value={username}
+              onChange={handleUsernameChange}
+              error={usernameError}
+              variant="outlined"
+              sx={{
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: '#FFFFFF',
+                  '& fieldset': {
+                    borderColor: '#CBD5E1',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#94A3B8',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1A237E',
+                  },
+                },
+              }}
+            />
+
+            {/* Password */}
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 600,
+                color: '#334155',
+                mb: '6px',
+                textAlign: 'left',
+              }}
+            >
+              Password
+            </Typography>
+            <TextField
+              fullWidth
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              placeholder="Enter Password"
+              value={password}
+              onChange={handlePasswordChange}
+              error={passwordError}
+              variant="outlined"
+              inputRef={passwordRef}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      onMouseDown={handleMouseDownPassword}
+                      edge="end"
+                      sx={{ color: '#64748B' }}
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+              sx={{
+                mb: 3,
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '8px',
+                  backgroundColor: '#FFFFFF',
+                  '& fieldset': {
+                    borderColor: '#CBD5E1',
+                  },
+                  '&:hover fieldset': {
+                    borderColor: '#94A3B8',
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: '#1A237E',
+                  },
+                },
+              }}
+            />
+
+            {/* Remember Me */}
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'flex-start',
+                alignItems: 'center',
+                mb: 4,
+                mt: -1,
+                width: '100%',
+              }}
+            >
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    sx={{
+                      color: '#64748B',
+                      '&.Mui-checked': {
+                        color: '#1A237E',
+                      },
+                    }}
+                  />
+                }
+                label={
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: '#475569',
+                      fontSize: '0.9rem',
+                      fontWeight: 600,
+                    }}
+                  >
+                    Remember Me
+                  </Typography>
+                }
+              />
+            </Box>
+
+            {/* Sign In button */}
+            <Button
+              variant="contained"
+              type="submit"
+              fullWidth
+              ref={loginButtonRef}
+              sx={{
+                py: 1.6,
+                backgroundColor: '#1E293B',
+                color: '#FFFFFF !important',
+                borderRadius: '8px',
+                fontWeight: 600,
+                fontSize: '1rem',
+                mb: 2,
+                textTransform: 'none',
+                '&:hover': {
+                  backgroundColor: '#0F172A',
+                },
+                '&:disabled': {
+                  backgroundColor: '#E2E8F0',
+                  color: '#94A3B8',
+                },
+              }}
+            >
+              {loading ? (
+                <Box display="flex" alignItems="center" gap={1} justifyContent="center">
+                  <CircularProgress size={20} sx={{ color: '#FFFFFF' }} />
+                  <span>{t('COMMON.LOADING')}</span>
+                </Box>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+        </Card>
+      </Box>
+    ) : (
+      <Box sx={{ position: 'relative', height: '100vh', overflow: 'hidden', backgroundColor: dynamicStyles.backgroundColor || '#F5F5F5' }}>
+        {loading && (
+          <Loader showBackdrop={true} loadingText={t('COMMON.LOADING')} />
+        )}
       <FloatingIconsOverlay />
       <ConcentricRingsBackground />
       
@@ -998,7 +1231,8 @@ const LoginPage = () => {
         </Box>
       </Box>
     </Box>
-  );
+  )
+);
 };
 
 export async function getStaticProps({ locale }: any) {
