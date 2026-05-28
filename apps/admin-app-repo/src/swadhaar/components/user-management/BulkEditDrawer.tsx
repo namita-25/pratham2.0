@@ -1,25 +1,26 @@
 import React, { useState } from 'react';
 import { 
-  Drawer, 
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Box, 
   Typography, 
   IconButton, 
   FormControl, 
-  InputLabel, 
   Select, 
   MenuItem, 
   Button, 
-  FormControlLabel, 
-  Checkbox,
   CircularProgress,
-  Alert
+  Alert,
+  DialogContentText
 } from '@mui/material';
-import { X } from 'lucide-react';
+import { X, Trash2 } from 'lucide-react';
 import CascadingGeoDropdowns, { GeoLocationState } from '../common/CascadingGeoDropdowns';
 import { updateUser, deleteUser } from '../../../services/UserService';
 import { readTenant, getRoleIdByTenantAndRoleName } from '../../../services/TenantApiService';
 import { getFieldIdsByName } from '../../../services/FieldsService';
-import { SWADHAAR_THEME, SWADHAAR_CONSTANTS } from '../../utils/swadhaar.constants';
+import { SWADHAAR_CONSTANTS } from '../../utils/swadhaar.constants';
 
 interface BulkEditDrawerProps {
   open: boolean;
@@ -35,7 +36,6 @@ const BulkEditDrawer: React.FC<BulkEditDrawerProps> = ({
   selectedUserIds,
 }) => {
   const [role, setRole] = useState('');
-  const [archiveUsers, setArchiveUsers] = useState(false);
   const [locations, setLocations] = useState<GeoLocationState>({
     state: '',
     stateId: '',
@@ -49,10 +49,10 @@ const BulkEditDrawer: React.FC<BulkEditDrawerProps> = ({
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
   const handleClear = () => {
     setRole('');
-    setArchiveUsers(false);
     setLocations({
       state: '',
       stateId: '',
@@ -66,21 +66,21 @@ const BulkEditDrawer: React.FC<BulkEditDrawerProps> = ({
     setApiError(null);
   };
 
-  const handleBulkSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCloseModal = () => {
+    handleClear();
+    onClose();
+  };
+
+  const handleAction = async (isArchive: boolean) => {
     setApiError(null);
 
     if (selectedUserIds.length === 0) {
-      setApiError('No users have been selected for bulk update.');
+      setApiError('No users have been selected for bulk operations.');
       return;
     }
 
-    // Check if at least one operational field is selected
-    const hasLocation = !!locations.stateId;
-    const hasRole = !!role;
-    
-    if (!hasLocation && !hasRole && !archiveUsers) {
-      setApiError('Please select at least one attribute to modify (Locations, Role, or Archive).');
+    if (!isArchive && !locations.stateId && !role) {
+      setApiError('Please select at least one field to update (Location or Role).');
       return;
     }
 
@@ -102,7 +102,7 @@ const BulkEditDrawer: React.FC<BulkEditDrawerProps> = ({
       );
 
       const customFieldsArray: Array<{ fieldId: string; value: string[] }> = [];
-      if (hasLocation && fieldMap) {
+      if (!isArchive && locations.stateId && fieldMap) {
         if (locations.stateId && fieldMap.State) {
           customFieldsArray.push({ fieldId: fieldMap.State, value: [locations.stateId] });
         }
@@ -119,10 +119,11 @@ const BulkEditDrawer: React.FC<BulkEditDrawerProps> = ({
 
       // Process parallel updates for each user to guarantee isolated error bounds
       const updatePromises = selectedUserIds.map(async (userId) => {
-        if (archiveUsers) {
-          // If archive is checked, perform the status deletion
+        if (isArchive) {
+          // Perform archive update
           return deleteUser(userId, { status: 'archived' });
         } else {
+          // Perform dynamic field update
           const updatePayload: any = {};
           if (role && roleId) {
             updatePayload.tenantCohortRoleMapping = [
@@ -151,177 +152,204 @@ const BulkEditDrawer: React.FC<BulkEditDrawerProps> = ({
     }
   };
 
+  const handleUpdateClick = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleAction(false);
+  };
+
   return (
-    <Drawer
-      anchor="right"
-      open={open}
-      onClose={onClose}
-      sx={{
-        '& .MuiDrawer-paper': {
-          width: { xs: '100vw', sm: '550px' },
-          boxSizing: 'border-box',
-          borderTopLeftRadius: '16px',
-          borderBottomLeftRadius: '16px',
-        },
-      }}
-    >
-      {/* Header Bar */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          padding: '20px 24px',
-          borderBottom: '1px solid rgba(26, 35, 126, 0.08)',
-          backgroundColor: '#0D1642',
-          color: '#FFFFFF',
+    <>
+      <Dialog
+        open={open}
+        onClose={handleCloseModal}
+        maxWidth="xs"
+        fullWidth
+        scroll="paper"
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.08)',
+            backgroundColor: '#FFFFFF',
+            padding: '12px 12px 20px 12px',
+            margin: '16px',
+          }
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          Bulk Edit Users ({selectedUserIds.length} Selected)
-        </Typography>
-        <IconButton onClick={onClose} sx={{ color: '#FFFFFF' }}>
-          <X size={20} />
-        </IconButton>
-      </Box>
-
-      {/* Scrollable Container Form */}
-      <Box
-        component="form"
-        onSubmit={handleBulkSubmit}
-        sx={{
-          flex: 1,
-          overflowY: 'auto',
-          padding: '24px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '32px',
-        }}
-      >
-        {apiError && (
-          <Alert severity="error" sx={{ borderRadius: '8px' }}>
-            {apiError}
-          </Alert>
-        )}
-
-        {/* 1. Optional Role Update */}
-        <Box>
-          <Typography
-            variant="subtitle2"
-            sx={{ fontWeight: 700, color: SWADHAAR_THEME.primary, marginBottom: '12px' }}
-          >
-            Update User Role (Optional)
-          </Typography>
-          <FormControl fullWidth>
-            <InputLabel id="bulk-role-label">Override Role</InputLabel>
-            <Select
-              labelId="bulk-role-label"
-              value={role}
-              label="Override Role"
-              onChange={(e) => setRole(e.target.value)}
-            >
-              <MenuItem value="CFL Incharge">CFL Incharge</MenuItem>
-              <MenuItem value="Trainer">Trainer</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-
-        {/* 2. Optional Geographic Updates */}
-        <Box>
-          <Typography
-            variant="subtitle2"
-            sx={{
-              fontWeight: 700,
-              color: SWADHAAR_THEME.primary,
-              marginBottom: '16px',
-              borderBottom: '1px solid rgba(26, 35, 126, 0.08)',
-              paddingBottom: '8px',
-            }}
-          >
-            Update Geographic Coverage (Optional)
-          </Typography>
-          <CascadingGeoDropdowns
-            values={locations}
-            onChange={(locs) => setLocations(locs)}
-            disabled={archiveUsers}
-          />
-        </Box>
-
-        {/* 3. Archive Toggle */}
-        <Box
-          sx={{
-            padding: '16px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(186, 26, 26, 0.04)',
-            border: '1px dashed rgba(186, 26, 26, 0.2)',
-          }}
-        >
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={archiveUsers}
-                onChange={(e) => setArchiveUsers(e.target.checked)}
-                sx={{
-                  color: '#BA1A1A',
-                  '&.Mui-checked': {
-                    color: '#BA1A1A',
-                  },
-                }}
-              />
-            }
-            label={
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 700, color: '#BA1A1A' }}>
-                  Archive Selected Users
-                </Typography>
-                <Typography variant="caption" sx={{ color: 'rgba(0,0,0,0.6)', display: 'block' }}>
-                  Restricts cohort access for all selected profiles. This action takes precedence.
-                </Typography>
-              </Box>
-            }
-          />
-        </Box>
-
-        {/* Bottom Drawer Actions */}
-        <Box
+        {/* Header Block */}
+        <DialogTitle
           sx={{
             display: 'flex',
-            justifyContent: 'flex-end',
-            gap: '16px',
-            marginTop: 'auto',
-            paddingTop: '24px',
-            borderTop: '1px solid rgba(26, 35, 126, 0.08)',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px 16px 8px 16px',
+            borderBottom: 'none',
           }}
         >
+          <Typography sx={{ fontWeight: 700, fontSize: '20px', color: '#111827', fontFamily: 'Inter, sans-serif' }}>
+            Bulk Edit Users
+          </Typography>
+          <IconButton onClick={handleCloseModal} size="small" sx={{ color: '#374151' }}>
+            <X size={18} />
+          </IconButton>
+        </DialogTitle>
+
+        {/* Form Content Block */}
+        <DialogContent
+          sx={{
+            padding: '8px 16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            overflowY: 'auto',
+            maxHeight: '70vh',
+          }}
+        >
+          {apiError && (
+            <Alert severity="error" sx={{ borderRadius: '8px', fontSize: '13px' }}>
+              {apiError}
+            </Alert>
+          )}
+
+          <Box component="form" onSubmit={handleUpdateClick} sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Cascading Geo Selection */}
+            <CascadingGeoDropdowns
+              values={locations}
+              onChange={(locs) => setLocations(locs)}
+              flatStyle
+              singleColumn
+            />
+
+            {/* Role selection */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                Role <span style={{ color: '#BA1A1A' }}>*</span>
+              </Typography>
+              <FormControl fullWidth>
+                <Select
+                  displayEmpty
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <span style={{ color: '#9CA3AF' }}>Select role</span>;
+                    }
+                    return selected as string;
+                  }}
+                  sx={{
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                    '& .MuiSelect-select': {
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: role ? '#1F2937' : '#9CA3AF',
+                    }
+                  }}
+                >
+                  <MenuItem value="CFL Incharge">CFL Incharge</MenuItem>
+                  <MenuItem value="Trainer">Trainer</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </Box>
+        </DialogContent>
+
+        <Box sx={{ borderTop: '1px solid #E5E7EB', my: 2 }} />
+
+        {/* Footer actions */}
+        <DialogActions sx={{ padding: '0px 16px 4px 16px', justifyContent: 'space-between' }}>
+          {/* Outlined red Archive button on the left */}
           <Button
             variant="outlined"
-            onClick={handleClear}
+            color="error"
+            startIcon={<Trash2 size={16} />}
+            onClick={() => setIsConfirmOpen(true)}
             disabled={loading}
             sx={{
               borderRadius: '8px',
-              borderColor: 'rgba(26, 35, 126, 0.3)',
-              color: SWADHAAR_THEME.primary,
-            }}
-          >
-            Clear Fields
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            disabled={loading}
-            sx={{
-              borderRadius: '8px',
-              backgroundColor: archiveUsers ? '#BA1A1A' : SWADHAAR_THEME.primary,
+              borderColor: '#BA1A1A',
+              color: '#BA1A1A',
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              padding: '10px 16px',
               '&:hover': {
-                backgroundColor: archiveUsers ? '#930006' : '#0D1642',
+                backgroundColor: 'rgba(186, 26, 26, 0.04)',
+                borderColor: '#BA1A1A',
               },
             }}
           >
-            {loading ? <CircularProgress size={20} color="inherit" /> : 'Apply Updates'}
+            Archive Users ({selectedUserIds.length})
           </Button>
-        </Box>
-      </Box>
-    </Drawer>
+
+          {/* Contained dark Bulk Update button on the right */}
+          <Button
+            onClick={handleUpdateClick}
+            disabled={loading}
+            variant="contained"
+            sx={{
+              borderRadius: '8px',
+              backgroundColor: '#1E293B',
+              color: '#FFFFFF',
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              padding: '10px 24px',
+              '&:hover': {
+                backgroundColor: '#0F172A',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#9CA3AF',
+                color: '#F3F4F6',
+              }
+            }}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : 'Bulk Update Users'}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Confirmation Dialog for Mass Archiving */}
+      <Dialog
+        open={isConfirmOpen}
+        onClose={() => setIsConfirmOpen(false)}
+        aria-labelledby="bulk-confirm-title"
+        aria-describedby="bulk-confirm-description"
+      >
+        <DialogTitle id="bulk-confirm-title" sx={{ fontWeight: 700, color: '#BA1A1A' }}>
+          Archive Selected Users?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="bulk-confirm-description">
+            Are you absolutely sure you want to archive <strong>{selectedUserIds.length}</strong> selected users? This will restrict their access to the platform and can only be undone by a system administrator.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ padding: '16px 24px' }}>
+          <Button onClick={() => setIsConfirmOpen(false)} variant="outlined">
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setIsConfirmOpen(false);
+              handleAction(true);
+            }}
+            variant="contained"
+            color="error"
+            autoFocus
+            sx={{
+              backgroundColor: '#BA1A1A',
+              '&:hover': {
+                backgroundColor: '#930006',
+              },
+            }}
+          >
+            Confirm Archive
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 

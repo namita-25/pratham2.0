@@ -1,31 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Drawer, 
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Box, 
   Typography, 
   IconButton, 
   TextField, 
   FormControl, 
-  InputLabel, 
   Select, 
   MenuItem, 
   Button, 
-  Grid,
   CircularProgress,
   Alert,
   FormHelperText,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions
+  DialogContentText
 } from '@mui/material';
 import { X, Trash2 } from 'lucide-react';
 import CascadingGeoDropdowns, { GeoLocationState } from '../common/CascadingGeoDropdowns';
 import { updateUser, deleteUser } from '../../../services/UserService';
 import { readTenant, getRoleIdByTenantAndRoleName } from '../../../services/TenantApiService';
 import { getFieldIdsByName } from '../../../services/FieldsService';
-import { SWADHAAR_THEME, SWADHAAR_CONSTANTS } from '../../utils/swadhaar.constants';
+import { SWADHAAR_CONSTANTS } from '../../utils/swadhaar.constants';
 
 interface EditUserDrawerProps {
   open: boolean;
@@ -71,7 +68,12 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
       setFirstName(user.firstName || names[0] || '');
       setLastName(user.lastName || names[1] || '');
       setEmail(user.email || '');
-      setPhone(user.mobile || user.phone || '');
+      
+      let mobileVal = user.mobile || user.phone || '';
+      if (mobileVal.startsWith('+91')) {
+        mobileVal = mobileVal.slice(3);
+      }
+      setPhone(mobileVal);
       setGender(user.gender || '');
       
       const userRole = user.tenantCohortRoleMapping?.[0]?.roleName || 
@@ -120,13 +122,48 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
     }
   }, [open]);
 
+  const handleClear = () => {
+    setFirstName('');
+    setLastName('');
+    setEmail('');
+    setPhone('');
+    setGender('');
+    setRole('');
+    setLocations({
+      state: '',
+      stateId: '',
+      district: '',
+      districtId: '',
+      block: '',
+      blockId: '',
+      village: '',
+      villageId: '',
+    });
+    setErrors({});
+    setApiError(null);
+  };
+
+  const handleCloseModal = () => {
+    handleClear();
+    onClose();
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
     
     const formErrors: Record<string, string> = {};
-    if (!firstName.trim()) formErrors.firstName = 'First Name is required';
-    if (!lastName.trim()) formErrors.lastName = 'Last Name is required';
+    if (!firstName.trim()) {
+      formErrors.firstName = 'First Name is required';
+    } else if (!/^[a-zA-Z]+$/.test(firstName)) {
+      formErrors.firstName = 'First Name must contain only letters';
+    }
+
+    if (!lastName.trim()) {
+      formErrors.lastName = 'Last Name is required';
+    } else if (!/^[a-zA-Z]+$/.test(lastName)) {
+      formErrors.lastName = 'Last Name must contain only letters';
+    }
     
     if (!email.trim()) {
       formErrors.email = 'Email is required';
@@ -134,10 +171,12 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
       formErrors.email = 'Invalid Email address format';
     }
 
+    const fullPhone = phone.startsWith('+91') ? phone.trim() : `+91${phone.trim()}`;
+
     if (!phone.trim()) {
-      formErrors.phone = 'Mobile Number is required (eg. +91XXXXXXXXXX)';
-    } else if (!SWADHAAR_CONSTANTS.MOBILE_REGEX.test(phone)) {
-      formErrors.phone = 'Mobile Number is required (eg. +91XXXXXXXXXX)';
+      formErrors.phone = 'Mobile Number is required (eg. 9876543210)';
+    } else if (!SWADHAAR_CONSTANTS.MOBILE_REGEX.test(fullPhone)) {
+      formErrors.phone = 'Mobile Number must be a valid 10-digit number (eg. 9876543210)';
     }
 
     if (!role) formErrors.role = 'Role selection is required';
@@ -182,7 +221,7 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
         lastName: lastName.trim(),
         gender: gender || 'female',
         email: email.trim(),
-        mobile: phone.trim(),
+        mobile: fullPhone,
         tenantCohortRoleMapping: [
           {
             tenantId,
@@ -203,12 +242,10 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
     }
   };
 
-  // Perform destructive Archive updates
   const handleArchiveUser = async () => {
     setArchiveLoading(true);
     setIsConfirmOpen(false);
     try {
-      // Archive User sends user status update as specified
       await deleteUser(user.userId || user.id, { status: 'archived' });
       onSuccess();
       onClose();
@@ -222,156 +259,238 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
 
   return (
     <>
-      <Drawer
-        anchor="right"
+      <Dialog
         open={open}
-        onClose={onClose}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: { xs: '100vw', sm: '550px' },
-            boxSizing: 'border-box',
-            borderTopLeftRadius: '16px',
-            borderBottomLeftRadius: '16px',
-          },
+        onClose={handleCloseModal}
+        maxWidth="xs"
+        fullWidth
+        scroll="paper"
+        PaperProps={{
+          sx: {
+            borderRadius: '16px',
+            boxShadow: '0px 10px 30px rgba(0, 0, 0, 0.08)',
+            backgroundColor: '#FFFFFF',
+            padding: '12px 12px 20px 12px',
+            margin: '16px',
+          }
         }}
       >
-        {/* Header Bar */}
-        <Box
+        {/* Header Block */}
+        <DialogTitle
           sx={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '20px 24px',
-            borderBottom: '1px solid rgba(26, 35, 126, 0.08)',
-            backgroundColor: SWADHAAR_THEME.primary,
-            color: '#FFFFFF',
+            padding: '12px 16px 8px 16px',
+            borderBottom: 'none',
           }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Edit User Profile
+          <Typography sx={{ fontWeight: 700, fontSize: '20px', color: '#111827', fontFamily: 'Inter, sans-serif' }}>
+            Edit User
           </Typography>
-          <IconButton onClick={onClose} sx={{ color: '#FFFFFF' }}>
-            <X size={20} />
+          <IconButton onClick={handleCloseModal} size="small" sx={{ color: '#374151' }}>
+            <X size={18} />
           </IconButton>
-        </Box>
+        </DialogTitle>
 
-        {/* Scrollable Container Form */}
-        <Box
-          component="form"
-          onSubmit={handleFormSubmit}
+        {/* Form Content Block */}
+        <DialogContent
           sx={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '24px',
+            padding: '8px 16px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '24px',
+            gap: '16px',
+            overflowY: 'auto',
+            maxHeight: '70vh',
           }}
         >
           {apiError && (
-            <Alert severity="error" sx={{ borderRadius: '8px' }}>
+            <Alert severity="error" sx={{ borderRadius: '8px', fontSize: '13px' }}>
               {apiError}
             </Alert>
           )}
 
-          <Grid container spacing={2}>
-            {/* First Name */}
-            <Grid item xs={12} sm={6}>
+          <Box component="form" onSubmit={handleFormSubmit} sx={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* 1. First Name */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                First Name <span style={{ color: '#BA1A1A' }}>*</span>
+              </Typography>
               <TextField
-                label="First Name *"
                 fullWidth
+                placeholder="Enter first Name"
                 value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^[a-zA-Z]*$/.test(val)) {
+                    setFirstName(val);
+                  }
+                }}
                 error={!!errors.firstName}
                 helperText={errors.firstName}
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#1F2937',
+                  }
+                }}
               />
-            </Grid>
+            </Box>
 
-            {/* Last Name */}
-            <Grid item xs={12} sm={6}>
+            {/* 2. Last Name */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                Last Name <span style={{ color: '#BA1A1A' }}>*</span>
+              </Typography>
               <TextField
-                label="Last Name *"
                 fullWidth
+                placeholder="Enter last Name"
                 value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^[a-zA-Z]*$/.test(val)) {
+                    setLastName(val);
+                  }
+                }}
                 error={!!errors.lastName}
                 helperText={errors.lastName}
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#1F2937',
+                  }
+                }}
               />
-            </Grid>
+            </Box>
 
-            {/* Email */}
-            <Grid item xs={12}>
+            {/* 3. Email */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                Email <span style={{ color: '#BA1A1A' }}>*</span>
+              </Typography>
               <TextField
-                label="Email Address *"
                 fullWidth
+                placeholder="Enter email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value.trim())}
                 error={!!errors.email}
                 helperText={errors.email}
+                variant="outlined"
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '12px 16px',
+                    fontSize: '14px',
+                    color: '#1F2937',
+                  }
+                }}
               />
-            </Grid>
+            </Box>
 
-            {/* Mobile Phone Number */}
-            <Grid item xs={12}>
+            {/* 4. Mobile Number */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                Mobile Number <span style={{ color: '#BA1A1A' }}>*</span>
+              </Typography>
               <TextField
-                label="Mobile Number *"
                 fullWidth
+                placeholder="Enter mobile number"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (/^\d*$/.test(val)) {
+                    setPhone(val);
+                  }
+                }}
                 error={!!errors.phone}
                 helperText={errors.phone}
+                variant="outlined"
+                inputProps={{ maxLength: 10 }}
+                InputProps={{
+                  startAdornment: (
+                    <Box sx={{ color: '#4B5563', mr: 1, fontSize: '14px', fontWeight: 500 }}>
+                      +91
+                    </Box>
+                  ),
+                }}
+                sx={{
+                  '& .MuiOutlinedInput-root': {
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                  },
+                  '& .MuiInputBase-input': {
+                    padding: '12px 16px 12px 0px',
+                    fontSize: '14px',
+                    color: '#1F2937',
+                  }
+                }}
               />
-            </Grid>
+            </Box>
 
-            {/* Gender */}
-            <Grid item xs={12} sm={6}>
+            {/* 5. Gender */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                Gender
+              </Typography>
               <FormControl fullWidth>
-                <InputLabel id="edit-gender-label">Gender</InputLabel>
                 <Select
-                  labelId="edit-gender-label"
+                  displayEmpty
                   value={gender}
-                  label="Gender"
                   onChange={(e) => setGender(e.target.value)}
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <span style={{ color: '#9CA3AF' }}>Select gender</span>;
+                    }
+                    return selected as string;
+                  }}
+                  sx={{
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                    '& .MuiSelect-select': {
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: gender ? '#1F2937' : '#9CA3AF',
+                    }
+                  }}
                 >
                   <MenuItem value="Female">Female</MenuItem>
                   <MenuItem value="Male">Male</MenuItem>
                   <MenuItem value="Transgender">Transgender</MenuItem>
                 </Select>
               </FormControl>
-            </Grid>
+            </Box>
 
-            {/* Role */}
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth error={!!errors.role}>
-                <InputLabel id="edit-role-label">Role *</InputLabel>
-                <Select
-                  labelId="edit-role-label"
-                  value={role}
-                  label="Role *"
-                  onChange={(e) => setRole(e.target.value)}
-                >
-                  <MenuItem value="CFL Incharge">CFL Incharge</MenuItem>
-                  <MenuItem value="Trainer">Trainer</MenuItem>
-                </Select>
-                {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
-              </FormControl>
-            </Grid>
-          </Grid>
-
-          {/* Geographic Selection Block */}
-          <Box>
-            <Typography
-              variant="subtitle2"
-              sx={{
-                fontWeight: 700,
-                color: SWADHAAR_THEME.primary,
-                marginBottom: '16px',
-                borderBottom: '1px solid rgba(26, 35, 126, 0.08)',
-                paddingBottom: '8px',
-              }}
-            >
-              Geographic Coverage (Cascading Options)
-            </Typography>
+            {/* Cascading Geo Coverage */}
             <CascadingGeoDropdowns
               values={locations}
               onChange={(locs) => {
@@ -386,71 +505,102 @@ const EditUserDrawer: React.FC<EditUserDrawerProps> = ({ open, onClose, onSucces
                 });
               }}
               errors={errors}
+              flatStyle
+              singleColumn
             />
-          </Box>
 
-          {/* Destructive Actions & Drawer Triggers */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginTop: 'auto',
-              paddingTop: '24px',
-              borderTop: '1px solid rgba(26, 35, 126, 0.08)',
-            }}
-          >
-            {/* Destructive red archive button */}
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<Trash2 size={16} />}
-              onClick={() => setIsConfirmOpen(true)}
-              disabled={loading || archiveLoading}
-              sx={{
-                borderRadius: '8px',
-                borderColor: '#BA1A1A',
-                color: '#BA1A1A',
-                '&:hover': {
-                  backgroundColor: 'rgba(186, 26, 26, 0.04)',
-                  borderColor: '#BA1A1A',
-                },
-              }}
-            >
-              Archive User
-            </Button>
-
-            <Box sx={{ display: 'flex', gap: '16px' }}>
-              <Button
-                variant="outlined"
-                onClick={onClose}
-                disabled={loading || archiveLoading}
-                sx={{
-                  borderRadius: '8px',
-                  borderColor: 'rgba(26, 35, 126, 0.3)',
-                  color: SWADHAAR_THEME.primary,
-                }}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                variant="contained"
-                disabled={loading || archiveLoading}
-                sx={{
-                  borderRadius: '8px',
-                  backgroundColor: SWADHAAR_THEME.primary,
-                  '&:hover': {
-                    backgroundColor: '#0D1642',
-                  },
-                }}
-              >
-                {loading ? <CircularProgress size={20} color="inherit" /> : 'Save Changes'}
-              </Button>
+            {/* 10. Role */}
+            <Box>
+              <Typography sx={{ fontWeight: 600, fontSize: '13px', mb: '6px', color: '#1F2937' }}>
+                Role <span style={{ color: '#BA1A1A' }}>*</span>
+              </Typography>
+              <FormControl fullWidth error={!!errors.role}>
+                <Select
+                  displayEmpty
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
+                  renderValue={(selected) => {
+                    if (!selected) {
+                      return <span style={{ color: '#9CA3AF' }}>Select role</span>;
+                    }
+                    return selected as string;
+                  }}
+                  sx={{
+                    backgroundColor: '#F3F4F6',
+                    borderRadius: '8px',
+                    '& fieldset': { border: 'none' },
+                    '&:hover fieldset': { border: 'none' },
+                    '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
+                    '& .MuiSelect-select': {
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      color: role ? '#1F2937' : '#9CA3AF',
+                    }
+                  }}
+                >
+                  <MenuItem value="CFL Incharge">CFL Incharge</MenuItem>
+                  <MenuItem value="Trainer">Trainer</MenuItem>
+                </Select>
+                {errors.role && <FormHelperText>{errors.role}</FormHelperText>}
+              </FormControl>
             </Box>
           </Box>
-        </Box>
-      </Drawer>
+        </DialogContent>
+
+        <Box sx={{ borderTop: '1px solid #E5E7EB', my: 2 }} />
+
+        {/* Footer Actions Block */}
+        <DialogActions sx={{ padding: '0px 16px 4px 16px', justifyContent: 'space-between' }}>
+          {/* Outlined red archive button on the left */}
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<Trash2 size={16} />}
+            onClick={() => setIsConfirmOpen(true)}
+            disabled={loading || archiveLoading}
+            sx={{
+              borderRadius: '8px',
+              borderColor: '#BA1A1A',
+              color: '#BA1A1A',
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              padding: '10px 16px',
+              '&:hover': {
+                backgroundColor: 'rgba(186, 26, 26, 0.04)',
+                borderColor: '#BA1A1A',
+              },
+            }}
+          >
+            Archive User
+          </Button>
+
+          {/* Contained dark Update button on the right */}
+          <Button
+            onClick={handleFormSubmit}
+            disabled={loading || archiveLoading}
+            variant="contained"
+            sx={{
+              borderRadius: '8px',
+              backgroundColor: '#1E293B',
+              color: '#FFFFFF',
+              textTransform: 'none',
+              fontWeight: 600,
+              fontSize: '14px',
+              padding: '10px 24px',
+              '&:hover': {
+                backgroundColor: '#0F172A',
+              },
+              '&.Mui-disabled': {
+                backgroundColor: '#9CA3AF',
+                color: '#F3F4F6',
+              }
+            }}
+          >
+            {loading ? <CircularProgress size={20} color="inherit" /> : 'Update User'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Modern Archiving Confirmation Dialog */}
       <Dialog

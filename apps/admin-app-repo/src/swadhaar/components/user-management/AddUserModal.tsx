@@ -105,6 +105,20 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
     setApiError(null);
   };
 
+  const isFormValid = () => {
+    if (!firstName.trim() || !/^[a-zA-Z]+$/.test(firstName)) return false;
+    if (!lastName.trim() || !/^[a-zA-Z]+$/.test(lastName)) return false;
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return false;
+    
+    const fullPhone = phone.startsWith('+91') ? phone.trim() : `+91${phone.trim()}`;
+    if (!phone.trim() || !SWADHAAR_CONSTANTS.MOBILE_REGEX.test(fullPhone)) return false;
+    
+    if (!role) return false;
+    if (!locations.stateId || !locations.districtId || !locations.blockId || !locations.villageId) return false;
+    
+    return true;
+  };
+
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
@@ -112,8 +126,17 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
     // Field validations
     const formErrors: Record<string, string> = {};
     
-    if (!firstName.trim()) formErrors.firstName = 'First Name is required';
-    if (!lastName.trim()) formErrors.lastName = 'Last Name is required';
+    if (!firstName.trim()) {
+      formErrors.firstName = 'First Name is required';
+    } else if (!/^[a-zA-Z]+$/.test(firstName)) {
+      formErrors.firstName = 'First Name must contain only letters';
+    }
+
+    if (!lastName.trim()) {
+      formErrors.lastName = 'Last Name is required';
+    } else if (!/^[a-zA-Z]+$/.test(lastName)) {
+      formErrors.lastName = 'Last Name must contain only letters';
+    }
     
     if (!email.trim()) {
       formErrors.email = 'Email is required';
@@ -121,10 +144,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
       formErrors.email = 'Invalid Email address format';
     }
 
+    const fullPhone = phone.startsWith('+91') ? phone.trim() : `+91${phone.trim()}`;
+
     if (!phone.trim()) {
-      formErrors.phone = 'Mobile Number is required (eg. +91XXXXXXXXXX)';
-    } else if (!SWADHAAR_CONSTANTS.MOBILE_REGEX.test(phone)) {
-      formErrors.phone = 'Mobile Number is required (eg. +91XXXXXXXXXX)';
+      formErrors.phone = 'Mobile Number is required (eg. 9876543210)';
+    } else if (!SWADHAAR_CONSTANTS.MOBILE_REGEX.test(fullPhone)) {
+      formErrors.phone = 'Mobile Number must be a valid 10-digit number (eg. 9876543210)';
     }
 
     if (!role) formErrors.role = 'Role selection is required';
@@ -172,13 +197,13 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
 
       const accountPayload = {
         name: `${firstName} ${lastName}`.trim(),
-        username: phone.trim(), // Use phone as standard username
+        username: fullPhone, // Use phone with +91 prefix as standard username
         password: defaultPassword,
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         gender: gender || 'female',
         email: email.trim(),
-        mobile: phone.trim(),
+        mobile: fullPhone,
         tenantCohortRoleMapping: [
           {
             tenantId,
@@ -272,7 +297,12 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
               fullWidth
               placeholder="Enter first Name"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^[a-zA-Z]*$/.test(val)) {
+                  setFirstName(val);
+                }
+              }}
               error={!!errors.firstName}
               helperText={errors.firstName}
               variant="outlined"
@@ -300,9 +330,14 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
             </Typography>
             <TextField
               fullWidth
-              placeholder="Enter first Name"
+              placeholder="Enter last Name"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^[a-zA-Z]*$/.test(val)) {
+                  setLastName(val);
+                }
+              }}
               error={!!errors.lastName}
               helperText={errors.lastName}
               variant="outlined"
@@ -332,7 +367,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
               fullWidth
               placeholder="Enter email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.trim())}
               error={!!errors.email}
               helperText={errors.email}
               variant="outlined"
@@ -360,12 +395,25 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
             </Typography>
             <TextField
               fullWidth
-              placeholder="Enter mobile number (Eg: +911234567890)"
+              placeholder="Enter mobile number (Eg: 9876543210)"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={(e) => {
+                const val = e.target.value;
+                if (/^\d*$/.test(val)) {
+                  setPhone(val);
+                }
+              }}
               error={!!errors.phone}
               helperText={errors.phone}
               variant="outlined"
+              inputProps={{ maxLength: 10 }}
+              InputProps={{
+                startAdornment: (
+                  <Box sx={{ color: '#4B5563', mr: 1, fontSize: '14px', fontWeight: 500 }}>
+                    +91
+                  </Box>
+                ),
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   backgroundColor: '#F3F4F6',
@@ -375,7 +423,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
                   '&.Mui-focused fieldset': { border: '1px solid #1E293B' },
                 },
                 '& .MuiInputBase-input': {
-                  padding: '12px 16px',
+                  padding: '12px 16px 12px 0px',
                   fontSize: '14px',
                   color: '#1F2937',
                 }
@@ -482,7 +530,7 @@ const AddUserModal: React.FC<AddUserModalProps> = ({ open, onClose, onSuccess })
       <DialogActions sx={{ padding: '0px 16px 4px 16px', justifyContent: 'flex-end' }}>
         <Button
           onClick={handleFormSubmit}
-          disabled={loading}
+          disabled={loading || !isFormValid()}
           variant="contained"
           sx={{
             borderRadius: '8px',
