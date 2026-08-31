@@ -215,14 +215,20 @@ const BulkStudentUploadModal: React.FC<BulkStudentUploadModalProps> = ({ open, o
   };
 
   return (
-    <Dialog open={open} onClose={uploading ? undefined : handleClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={uploading ? undefined : handleClose} maxWidth={false} fullWidth PaperProps={{
+      sx: {
+        width: '700px',
+        maxWidth: '90vw',
+        borderRadius: 3,
+      },
+    }}>
       <DialogTitle sx={{ pb: 2 }}>
         <Typography variant="h5" component="div" fontWeight="bold">
           Bulk Upload Students
         </Typography>
       </DialogTitle>
-      <DialogContent dividers sx={{ p: 4 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 4, p: 3, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
+      <DialogContent dividers sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 2, p: 3, bgcolor: 'background.default', borderRadius: 2, border: '1px solid', borderColor: 'divider' }}>
           <Typography variant="body2" color="textSecondary" sx={{ lineHeight: 1.6 }}>
             Upload a CSV file containing student details. <br />
             Required columns: <strong>firstName, lastName, username</strong>. <br />
@@ -244,7 +250,7 @@ const BulkStudentUploadModal: React.FC<BulkStudentUploadModalProps> = ({ open, o
               border: '2px dashed',
               borderColor: 'primary.main',
               borderRadius: 3,
-              p: 6,
+              p: 4,
               textAlign: 'center',
               cursor: 'pointer',
               bgcolor: 'rgba(25, 118, 210, 0.04)', // subtle primary color background

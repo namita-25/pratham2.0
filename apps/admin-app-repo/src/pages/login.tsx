@@ -194,11 +194,12 @@ const LoginPage = () => {
 
         if (role) {
           if (role?.role === Role.ADMIN) {
-            // Redirect ADMIN users to /learners (first Manage Users option)
+            const isOBLFProgram = typeof window !== 'undefined' ? localStorage.getItem('channelId') === 'oblf-channel' : false;
+            const targetPath = isOBLFProgram ? '/TeacherList' : '/learners';
             if (locale) {
-              router.push('/learners', undefined, { locale: locale });
+              router.push(targetPath, undefined, { locale: locale });
             } else {
-              router.push('/learners');
+              router.push(targetPath);
             }
           } else if (role?.role === Role.SCTA || role?.role === Role.CCTA || role?.role === Role.TEACHER || role?.role === Role.STAFF || role?.role === Role.SUPERVISOR) {
             // Redirect SCTA and CCTA users to workspace
@@ -337,17 +338,19 @@ const LoginPage = () => {
         // Always redirect based on role, ignoring current URL
         // Use replace() to avoid back button issues and ensure clean navigation
         if (userInfo?.role === Role.ADMIN) {
-          console.log('✅ Redirecting ADMIN to /learners');
+          const isOBLFProgram = typeof window !== 'undefined' ? localStorage.getItem('channelId') === 'oblf-channel' : false;
+          const basePath = isOBLFProgram ? '/TeacherList' : '/learners';
+          console.log(`✅ Redirecting ADMIN to ${basePath}`);
           const { locale } = router;
           // Use window.location for hard redirect to ensure URL changes completely
           if (typeof window !== 'undefined') {
-            const targetPath = locale ? `/${locale}/learners` : '/learners';
+            const targetPath = locale ? `/${locale}${basePath}` : basePath;
             window.location.href = targetPath;
           } else {
             if (locale) {
-              router.replace('/learners', undefined, { locale: locale });
+              router.replace(basePath, undefined, { locale: locale });
             } else {
-              router.replace('/learners');
+              router.replace(basePath);
             }
           }
         } else if (
@@ -400,17 +403,19 @@ const LoginPage = () => {
               setIsActiveYearSelected(true);
               // router.push("/centers");
               if (userInfo?.role === Role.ADMIN) {
-                console.log('✅ Redirecting ADMIN to /learners (from academic year)');
+                const isOBLFProgram = typeof window !== 'undefined' ? localStorage.getItem('channelId') === 'oblf-channel' : false;
+                const basePath = isOBLFProgram ? '/TeacherList' : '/learners';
+                console.log(`✅ Redirecting ADMIN to ${basePath} (from academic year)`);
                 const { locale } = router;
                 // Use window.location for hard redirect
                 if (typeof window !== 'undefined') {
-                  const targetPath = locale ? `/${locale}/learners` : '/learners';
+                  const targetPath = locale ? `/${locale}${basePath}` : basePath;
                   window.location.href = targetPath;
                 } else {
                   if (locale) {
-                    router.replace('/learners', undefined, { locale: locale });
+                    router.replace(basePath, undefined, { locale: locale });
                   } else {
-                    router.replace('/learners');
+                    router.replace(basePath);
                   }
                 }
               } else if (

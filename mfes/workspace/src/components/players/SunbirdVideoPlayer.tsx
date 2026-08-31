@@ -179,6 +179,7 @@ const SunbirdVideoPlayer = ({ playerConfig }: PlayerConfigProps) => {
         <div className={styles.loadingOverlay}>Loading video player...</div>
       )}
       <div className={styles.videoContainer}>
+        {/* @ts-ignore */}
         <sunbird-video-player
           player-config={JSON.stringify(playerConfig)}
           ref={sunbirdVideoPlayerRef}

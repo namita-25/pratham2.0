@@ -48,40 +48,41 @@ const GenericEditor: React.FC = () => {
     window.location.hash = "no";
   };
   const sendReviewNotification = async (notificationData: any) => {
-   
-    try{
-    const response = await fetchCCTAList();
-    const cctaList = response;
-    console.log("response", response);
-    const isQueue = false;
-    const context = "CMS";
-    const key = "onContentReview";
-    const url = `${window.location.origin}/workspace/content/review?identifier=${notificationData?.contentId}`;
- const ContentDetail = await fetch(
+
+    try {
+      const response = await fetchCCTAList();
+      const cctaList = response;
+      console.log("response", response);
+      const isQueue = false;
+      const context = "CMS";
+      const key = "onContentReview";
+      const url = `${window.location.origin}/workspace/content/review?identifier=${notificationData?.contentId}`;
+      const ContentDetail = await fetch(
         `/action/content/v3/read/${notificationData?.contentId}`
       );
       const data = await ContentDetail.json();
 
-    cctaList?.map(async (user: any) => {
-      const replacements = {
-        "{reviewerName}": user?.name,
-        "{creatorName}": notificationData?.creator,
-        "{contentId}": notificationData?.contentId,
-        "{appUrl}": url,
-        "{submissionDate}": new Date(),
-        "{contentType}":"Learning Resource",
-        "{contentTitle}":data?.result?.content?.name
-      };
-      const response = await sendCredentialService({
-        isQueue,
-        context,
-        key,
-        replacements,
-        email:  
-        {receipients: [user?.email]},
+      cctaList?.map(async (user: any) => {
+        const replacements = {
+          "{reviewerName}": user?.name,
+          "{creatorName}": notificationData?.creator,
+          "{contentId}": notificationData?.contentId,
+          "{appUrl}": url,
+          "{submissionDate}": new Date(),
+          "{contentType}": "Learning Resource",
+          "{contentTitle}": data?.result?.content?.name
+        };
+        const response = await sendCredentialService({
+          isQueue,
+          context,
+          key,
+          replacements,
+          email:
+            { receipients: [user?.email] },
+        });
       });
-    });}
-    catch(error){
+    }
+    catch (error) {
       console.error("Error sending email notifications:", error);
 
     }
@@ -253,14 +254,14 @@ const GenericEditor: React.FC = () => {
       window["config"].enableTelemetryValidation = false;
       window["config"].videoMaxSize = videoMaxSize;
       window["config"].defaultContentFileSize = defaultContentFileSize;
-    window['config'].cloudStorage = {
-      provider: 'aws',
-      //  provider: 'azure',
-       presigned_headers: {
-           'x-amz-acl': 'private',
+      window['config'].cloudStorage = {
+        provider: 'aws',
+        //  provider: 'azure',
+        presigned_headers: {
+          'x-amz-acl': 'private',
           // 'x-ms-blob-type': 'BlockBlob', // This header sets access control; it's specific to AWS S3.
-      },
-    };
+        },
+      };
     }
   };
 

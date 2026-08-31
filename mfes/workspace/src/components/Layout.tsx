@@ -27,7 +27,7 @@ const Layout: React.FC<LayoutProps> = ({ children, selectedKey, onSelect }) => {
         !toastShown
       ) {
         toast(
-          (t) => (
+          (t: any) => (
             <Box
               style={{
                 display: "flex",

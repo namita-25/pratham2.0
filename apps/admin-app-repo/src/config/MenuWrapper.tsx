@@ -100,12 +100,14 @@ const MenuWrapper = ({ children }: { children: React.ReactNode }) => {
                     actualRole === 'State Admin';
     
     if (isAdmin && router.pathname === '/workspace') {
-      console.log('⚠️ ADMIN user detected on /workspace, redirecting to /learners');
+      const isOBLFProgram = typeof window !== 'undefined' ? localStorage.getItem('channelId') === 'oblf-channel' : false;
+      const targetPath = isOBLFProgram ? '/TeacherList' : '/learners';
+      console.log(`⚠️ ADMIN user detected on /workspace, redirecting to ${targetPath}`);
       console.log('   Role from roleName:', user.role, 'Role from adminInfo:', actualRole);
       if (typeof window !== 'undefined') {
-        window.location.href = '/learners';
+        window.location.href = targetPath;
       } else {
-        router.replace('/learners');
+        router.replace(targetPath);
       }
       return;
     }

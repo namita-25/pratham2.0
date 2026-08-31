@@ -73,8 +73,23 @@ const Sidebar = ({
 
         if (!isAllowed) return;
 
-        // For non-OBLF programs, hide specific items
-        if (!isOBLFProgram) {
+        if (isOBLFProgram) {
+          if (key === 'manageUsers' && item.subMenu) {
+            const filteredSubMenu = item.subMenu.filter((sub: any) => {
+              // Hide Learners from submenu for OBLF
+              return sub.title !== 'Learners';
+            });
+
+            if (filteredSubMenu.length > 0) {
+              processedMenuConfig[key] = {
+                ...item,
+                subMenu: filteredSubMenu,
+              };
+            }
+            return;
+          }
+        } else {
+          // For non-OBLF programs, hide specific items
           // Hide "Classes", "centers" and "clusters" for non-OBLF programs
           if (key === 'classes' || key === 'centers' || key === 'clusters') {
             return;

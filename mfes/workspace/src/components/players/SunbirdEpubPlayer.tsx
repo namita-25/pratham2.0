@@ -2,6 +2,8 @@
 import 'reflect-metadata';
 import React, { useEffect, useRef, useState } from 'react';
 import { getTelemetryEvents, handleExitEvent } from '@workspace/utils/Helper';
+
+
 interface PlayerConfigProps {
   playerConfig: any;
 }
@@ -78,6 +80,7 @@ const SunbirdEpubPlayer = ({ playerConfig }: PlayerConfigProps) => {
   return (
     <div className="player-grid" style={{ height: '100vh' }}>
       {isScriptLoaded ? (
+        // @ts-ignore
         <sunbird-epub-player
           player-config={JSON.stringify(playerConfig)}
           ref={sunbirdEpubPlayerRef}

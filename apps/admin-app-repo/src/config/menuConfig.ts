@@ -8,21 +8,11 @@ const UNIVERSAL_ADMIN_MENU = {
     icon: '/images/group.svg',
     roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
     subMenu: [
-      {
-        title: 'Learners',
-        link: '/learners',
-        roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
-      },
-      {
-        title: 'Content Creator',
-        link: '/content-creator',
-        roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
-      },
-      {
-        title: 'Content Reviewer',
-        link: '/content-reviewer',
-        roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
-      },
+      // {
+      //   title: 'Learners',
+      //   link: '/learners',
+      //   roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
+      // },
       {
         title: 'Teacher',
         link: '/TeacherList',
@@ -43,6 +33,17 @@ const UNIVERSAL_ADMIN_MENU = {
         link: '/supervisor',
         roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
       },
+      {
+        title: 'Content Creator',
+        link: '/content-creator',
+        roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
+      },
+      {
+        title: 'Content Reviewer',
+        link: '/content-reviewer',
+        roles: [Role.ADMIN, Role.CENTRAL_ADMIN],
+      }
+
     ],
   },
 
