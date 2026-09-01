@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import BulkStudentUploadModal from './BulkStudentUploadModal';
+import { v4 as uuidv4 } from 'uuid';
 import {
   Box,
   Button,
@@ -16,19 +18,26 @@ import {
   InputAdornment,
   Typography,
   Alert,
+  CircularProgress,
+  Badge,
 } from '@mui/material';
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff, Add as AddIcon, Cancel as CancelIcon, CheckCircle as CheckCircleIcon } from '@mui/icons-material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import SimpleModal from './SimpleModal';
 import { showToastMessage } from './Toastify';
+import { createAccount } from '../services/AccountService';
 import {
   createUserStudentTeacher,
   validateEmail,
   USER_ROLES,
   CUSTOM_FIELDS,
+  getCohortList,
+  createCohort,
+  assignClassToTeacher,
 } from '../services/CohortService/cohortService';
 interface AddTeacherModalProps {
   open: boolean;
@@ -48,62 +57,123 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
     email: '',
     username: '',
     password: '',
-    // teacherId: '',
     gender: '',
-    // role: '',
-    // cefrLevel: '',
-    // program: '',
-    // subProgram: '',
-    // supervisor: '',
-    // villageName: '',
-    // dateOfJoining: null as Dayjs | null,
-    // oldTeacherId: '',
-    // dateOfLeaving: null as Dayjs | null,
-    // reasonForLeaving: '',
+    schoolId: '',
   });
+
+  interface TeacherClass {
+    id: string;
+    classId: string;
+    name: string;
+    fromTime: string;
+    toTime: string;
+    studentsData?: any[];
+  }
+  const [classes, setClasses] = useState<TeacherClass[]>([{ id: '1', classId: '', name: '', fromTime: '', toTime: '' }]);
+  const [availableClasses, setAvailableClasses] = useState<any[]>([]);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [uploadClassId, setUploadClassId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+
+  const [schools, setSchools] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (open) {
+      const fetchSchools = async () => {
+        try {
+          const schoolRequestData = {
+            limit: 0,
+            offset: 0,
+            filters: {
+              type: 'SCHOOL',
+              status: ['active'],
+            },
+          };
+          const response = await getCohortList(schoolRequestData);
+          if (response?.results?.cohortDetails) {
+            setSchools(response.results.cohortDetails);
+          }
+        } catch (error) {
+          console.error('Error fetching schools:', error);
+        }
+      };
+      fetchSchools();
+    }
+  }, [open]);
+
+  useEffect(() => {
+    if (formData.schoolId) {
+      const fetchClasses = async () => {
+        try {
+          const tenantId = localStorage.getItem('tenantId');
+          const response = await getCohortList({
+            limit: 200,
+            offset: 0,
+            filters: {
+              type: 'COHORT',
+              status: ['active'],
+              parentId: [formData.schoolId],
+
+              tenantId: tenantId,
+            },
+          });
+          if (response?.results?.cohortDetails) {
+            setAvailableClasses(response.results.cohortDetails);
+          } else {
+            setAvailableClasses([]);
+          }
+        } catch (error) {
+          console.error('Error fetching classes:', error);
+          setAvailableClasses([]);
+        }
+      };
+      fetchClasses();
+    } else {
+      setAvailableClasses([]);
+    }
+  }, [formData.schoolId]);
   // Phone number validation (same as AddUserForm)
   const validatePhone = (phone: string): string | null => {
     if (!phone.trim()) return null; // Optional field, no error if empty
-    
+
     // Check if phone contains only digits
     if (!/^\d+$/.test(phone)) {
       return 'Phone number must contain only digits (0-9)';
     }
-    
+
     // Check if phone is exactly 10 digits
     if (phone.length !== 10) {
       return 'Phone number must be exactly 10 digits';
     }
-    
+
     return null;
   };
 
   // Password validation (same as AddUserForm)
   const validatePassword = (password: string): string | null => {
     if (!password) return 'Password is required';
-    
+
     // Check all requirements and return a single combined message if any fail
     const hasMinLength = password.length >= 8;
     const hasLowercase = /(?=.*[a-z])/.test(password);
     const hasUppercase = /(?=.*[A-Z])/.test(password);
     const hasNumber = /(?=.*\d)/.test(password);
     const hasSpecialChar = /(?=.*[@$!%*?&])/.test(password);
-    
+
     if (!hasMinLength || !hasLowercase || !hasUppercase || !hasNumber || !hasSpecialChar) {
       return 'Password must be at least 8 characters long, include numerals, uppercase, lowercase, and special characters.';
     }
-    
+
     return null;
   };
 
   const handleChange = (field: string, value: any) => {
     let finalValue = value;
-    
+
     // For contactNumber field, only allow digits and limit to 10 characters (same as AddUserForm)
     if (field === 'contactNumber') {
       // Remove any non-digit characters
@@ -111,9 +181,9 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
       // Limit to 10 digits
       finalValue = digitsOnly.slice(0, 10);
     }
-    
+
     setFormData((prev) => ({ ...prev, [field]: finalValue }));
-    
+
     // Validate field in real-time as user types (for contactNumber and password) - same as AddUserForm
     if (field === 'contactNumber' || field === 'password') {
       if (field === 'contactNumber') {
@@ -151,6 +221,26 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
     }
   };
 
+  const handleAddClass = () => {
+    setClasses(prev => [...prev, { id: uuidv4(), classId: '', name: '', fromTime: '', toTime: '' }]);
+  };
+
+  const handleRemoveClass = (id: string) => {
+    setClasses(prev => prev.filter(c => c.id !== id));
+  };
+
+  const handleClassChange = (id: string, field: 'name' | 'fromTime' | 'toTime' | 'classId', value: string) => {
+    setClasses(prev => prev.map(c => c.id === id ? { ...c, [field]: value } : c));
+  };
+
+  const handleParsedData = (data: any[]) => {
+    if (uploadClassId) {
+      setClasses(classes.map(c => c.id === uploadClassId ? { ...c, studentsData: data } : c));
+      setUploadModalOpen(false);
+      showToastMessage(`${data.length} students ready to upload for this class.`, 'success');
+    }
+  };
+
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
 
@@ -165,6 +255,10 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
 
     if (!formData.username.trim()) {
       newErrors.username = 'Username is required';
+    }
+
+    if (!formData.schoolId) {
+      newErrors.schoolId = 'School assignment is required';
     }
 
     if (!formData.email.trim()) {
@@ -236,7 +330,45 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
       const response = await createUserStudentTeacher(userData);
 
       if (response?.responseCode === 201) {
-        showToastMessage(`Teacher added successfully!`, 'success');
+        const newTeacherId = response.result?.userId || response.data?.userId;
+
+        if (newTeacherId && formData.schoolId) {
+          // Assign teacher to existing classes
+          for (const cls of classes) {
+            if (!cls.classId) continue;
+
+            try {
+              await assignClassToTeacher({
+                cohortId: [cls.classId],
+                userId: [newTeacherId]
+              });
+
+              // Upload parsed students for this class if any
+              if (cls.studentsData && cls.studentsData.length > 0) {
+                for (const studentData of cls.studentsData) {
+                  try {
+                    const res = await createAccount(studentData);
+                    const newStudentId = res?.result?.userId || res?.data?.userId;
+                    if (newStudentId) {
+                      const { post } = await import('@/services/RestClient');
+                      const { API_ENDPOINTS } = await import('@/services/CohortService/cohortService');
+                      await post(API_ENDPOINTS.cohortMemberBulkCreate, {
+                        userId: [newStudentId],
+                        cohortId: [cls.classId],
+                      });
+                    }
+                  } catch (err) {
+                    console.error('Failed to create student:', err);
+                  }
+                }
+              }
+            } catch (err) {
+              console.error('Failed to assign class:', cls.name, err);
+            }
+          }
+        }
+
+        showToastMessage(`Teacher and classes added successfully!`, 'success');
         console.log(`Teacher created:`, response.data);
 
         onSuccess();
@@ -251,7 +383,9 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
           username: '',
           gender: '',
           password: '',
+          schoolId: '',
         });
+        setClasses([{ id: uuidv4(), classId: '', name: '', fromTime: '', toTime: '' }]);
         setErrors({});
         setError(null);
       } else {
@@ -339,19 +473,10 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
       email: '',
       username: '',
       password: '',
-      // teacherId: '',
       gender: '',
-      // role: '',
-      // cefrLevel: '',
-      // program: '',
-      // subProgram: '',
-      // supervisor: '',
-      // villageName: '',
-      // dateOfJoining: null,
-      // oldTeacherId: '',
-      // dateOfLeaving: null,
-      // reasonForLeaving: '',
+      schoolId: '',
     });
+    setClasses([{ id: uuidv4(), classId: '', name: '', fromTime: '', toTime: '' }]);
     setErrors({});
     setError(null);
     onClose();
@@ -363,15 +488,16 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
       onClose={onClose}
       showFooter={false}
       modalTitle="New Teacher"
-      isFullwidth={true}
+      width="800px"
+      height="90vh"
     >
       <LocalizationProvider dateAdapter={AdapterDayjs}>
         <Box sx={{ mt: 2 }}>
           {error && (
-            <Alert 
-              severity="error" 
-              sx={{ 
-                mb: 2, 
+            <Alert
+              severity="error"
+              sx={{
+                mb: 2,
                 borderRadius: 1
               }}
             >
@@ -516,6 +642,112 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
             }}
             sx={{ mb: 2 }}
           />
+
+          {/* School Assigned */}
+          <FormControl fullWidth size="small" sx={{ mb: 3 }} error={!!errors.schoolId}>
+            <InputLabel>School Assigned *</InputLabel>
+            <Select
+              value={formData.schoolId}
+              label="School Assigned *"
+              onChange={(e) => handleChange('schoolId', e.target.value)}
+            >
+              <MenuItem value="">
+                <em>Select School</em>
+              </MenuItem>
+              {schools.map((school) => (
+                <MenuItem key={school.cohortId} value={school.cohortId}>
+                  {school.name}
+                </MenuItem>
+              ))}
+            </Select>
+            {errors.schoolId && <Typography variant="caption" color="error" sx={{ mt: 0.5, ml: 1.75 }}>{errors.schoolId}</Typography>}
+          </FormControl>
+
+          {/* Classes & Timings */}
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 'bold' }}>
+              Classes & Timings
+            </Typography>
+            {classes.map((cls, index) => (
+              <Box key={cls.id} sx={{ display: 'flex', flexDirection: 'column', gap: 2, mb: 3, p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1, position: 'relative' }}>
+                {classes.length > 1 && (
+                  <IconButton
+                    color="error"
+                    onClick={() => handleRemoveClass(cls.id)}
+                    sx={{ position: 'absolute', right: 8, top: 8 }}
+                    size="small"
+                  >
+                    <CancelIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <FormControl size="small" fullWidth>
+                  <InputLabel>Select Class *</InputLabel>
+                  <Select
+                    value={cls.classId || ''}
+                    label="Select Class *"
+                    onChange={(e) => {
+                      const selectedId = e.target.value;
+                      const selectedClass = availableClasses.find(c => c.cohortId === selectedId);
+                      handleClassChange(cls.id, 'classId', selectedId);
+                      if (selectedClass) {
+                        handleClassChange(cls.id, 'name', selectedClass.name);
+                        if (selectedClass.metadata?.fromTime) handleClassChange(cls.id, 'fromTime', selectedClass.metadata.fromTime);
+                        if (selectedClass.metadata?.toTime) handleClassChange(cls.id, 'toTime', selectedClass.metadata.toTime);
+                      }
+                    }}
+                    disabled={!formData.schoolId}
+                  >
+                    <MenuItem value=""><em>Select a Class</em></MenuItem>
+                    {availableClasses.map((c) => (
+                      <MenuItem key={c.cohortId} value={c.cohortId}>{c.name}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                  <Typography variant="body2" sx={{ color: 'text.secondary', minWidth: 70 }}>
+                    From Time
+                  </Typography>
+                  <TimePicker
+                    value={cls.fromTime ? dayjs(cls.fromTime, 'hh:mm A') : null}
+                    onChange={(newValue) => {
+                      handleClassChange(cls.id, 'fromTime', newValue ? newValue.format('hh:mm A') : '');
+                    }}
+                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  />
+                  <Typography variant="body2" sx={{ color: 'text.secondary', minWidth: 50, ml: 1 }}>
+                    To Time
+                  </Typography>
+                  <TimePicker
+                    value={cls.toTime ? dayjs(cls.toTime, 'hh:mm A') : null}
+                    onChange={(newValue) => {
+                      handleClassChange(cls.id, 'toTime', newValue ? newValue.format('hh:mm A') : '');
+                    }}
+                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
+                  />
+                </Box>
+
+                <Box sx={{ display: 'flex' }}>
+                  <Badge color="success" badgeContent={cls.studentsData?.length || 0} invisible={!cls.studentsData || cls.studentsData.length === 0}>
+                    <Button
+                      variant={cls.studentsData?.length ? "contained" : "outlined"}
+                      color={cls.studentsData?.length ? "success" : "primary"}
+                      size="small"
+                      onClick={() => {
+                        setUploadClassId(cls.id);
+                        setUploadModalOpen(true);
+                      }}
+                    >
+                      {cls.studentsData?.length ? 'Students Ready' : 'Upload Students'}
+                    </Button>
+                  </Badge>
+                </Box>
+              </Box>
+            ))}
+            {/* <Button startIcon={<AddIcon />} onClick={handleAddClass} size="small">
+              Add another class
+            </Button> */}
+          </Box>
 
           {/* Teacher Id */}
           {/* <TextField
@@ -708,6 +940,13 @@ const AddTeacherModal: React.FC<AddTeacherModalProps> = ({
           </Box>
         </Box>
       </LocalizationProvider>
+      <BulkStudentUploadModal
+        open={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        onSuccess={() => setUploadModalOpen(false)}
+        isOffline={true}
+        onParsedData={handleParsedData}
+      />
     </SimpleModal>
   );
 };

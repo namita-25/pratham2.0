@@ -67,7 +67,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
   School as SchoolIcon,
-    CheckCircle as CheckCircleIcon,
+  CheckCircle as CheckCircleIcon,
   Cancel as CancelIcon,
   Pending as PendingIcon,
   Close as CloseIcon,
@@ -83,6 +83,7 @@ import {
 import { showToastMessage } from '@/components/Toastify';
 import AddTeacherModal from '@/components/AddTeacherModal';
 import EditUserModal from '@/components/EditUserModal';
+import OBLFEditTeacherModal from '@/components/OBLFEditTeacherModal';
 import { deleteUser } from '@/services/UserService';
 import { userList } from '@/services/UserList';
 
@@ -158,6 +159,8 @@ const TeacherList = () => {
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'active' | 'inactive' | 'pending' | 'archived'
   >('all');
+
+  const isOBLFProgram = typeof window !== 'undefined' && localStorage.getItem('channelId') === 'oblf-channel';
   const [selectedCluster, setSelectedCluster] = useState('All');
   const [clusters, setClusters] = useState<CohortCenter[]>([]);
   const [selectedSchool, setSelectedSchool] = useState('All');
@@ -443,7 +446,7 @@ const TeacherList = () => {
 
         const response: any = await getCohortList(requestData as any);
         const data = response?.results?.cohortDetails || [];
-        
+
         if (data.length > 0) {
           allData = [...allData, ...data];
           offset += batchSize;
@@ -495,7 +498,7 @@ const TeacherList = () => {
 
             // Handle various response formats
             let cohortsArray: any[] = [];
-            
+
             if (Array.isArray(teacherCohorts)) {
               cohortsArray = teacherCohorts;
             } else if (teacherCohorts?.cohortData && Array.isArray(teacherCohorts.cohortData)) {
@@ -503,18 +506,18 @@ const TeacherList = () => {
             } else if (teacherCohorts?.result && Array.isArray(teacherCohorts.result)) {
               cohortsArray = teacherCohorts.result;
             }
-            
+
             // Extract cohortIds from the array
             cohortsArray.forEach((cohort: any) => {
-                 if ((cohort.cohortId || cohort.id) && cohort.cohortMemberStatus !== 'archived') {
-                     const cId = cohort.cohortId || cohort.id;
-                     const mId = cohort.cohortMembershipId || cohort.membershipId; // Ensure we capture membershipId if available
-                     if (cId) {
-                         teacherCurrentClassesMap.set(String(cId).toLowerCase(), mId);
-                     }
-                 }
+              if ((cohort.cohortId || cohort.id) && cohort.cohortMemberStatus !== 'archived') {
+                const cId = cohort.cohortId || cohort.id;
+                const mId = cohort.cohortMembershipId || cohort.membershipId; // Ensure we capture membershipId if available
+                if (cId) {
+                  teacherCurrentClassesMap.set(String(cId).toLowerCase(), mId);
+                }
+              }
             });
-            
+
             console.log('Teacher current classes extracted (excluding archived):', teacherCurrentClassesMap.keys());
           } catch (err) {
             console.error('Error fetching teacher current classes:', err);
@@ -527,7 +530,7 @@ const TeacherList = () => {
           const normalizedId = String(cls.cohortId).toLowerCase();
           const isAssigned = teacherCurrentClassesMap.has(normalizedId);
           const membershipId = teacherCurrentClassesMap.get(normalizedId);
-          
+
           return {
             classId: cls.cohortId,
             className: cls.name,
@@ -831,8 +834,8 @@ const TeacherList = () => {
     const hasChanges = classAssignments.some(cls => cls.assigned !== cls.originallyAssigned);
 
     if (!selectedTeacher || !hasChanges) {
-         if (!hasChanges) showToastMessage('No changes to save', 'info');
-         return;
+      if (!hasChanges) showToastMessage('No changes to save', 'info');
+      return;
     }
 
     setAssignLoading(true);
@@ -857,46 +860,46 @@ const TeacherList = () => {
 
       // Execute Additions
       if (classesToAssign.length > 0) {
-          const response = await assignClassToTeacher({
-            userId: [selectedTeacher.userId],
-            cohortId: classesToAssign, 
-          });
-           if (!response?.success && response?.responseCode !== 201) {
-              throw new Error(response?.message || 'Failed to assign some classes');
-           }
+        const response = await assignClassToTeacher({
+          userId: [selectedTeacher.userId],
+          cohortId: classesToAssign,
+        });
+        if (!response?.success && response?.responseCode !== 201) {
+          throw new Error(response?.message || 'Failed to assign some classes');
+        }
       }
 
       // Execute Removals
       if (classesToUnassign.length > 0) {
-           const removePromises = classesToUnassign.map(async (cls) => {
-              if (cls.membershipId) {
-                  return updateCohortMemberStatus({
-                      membershipId: cls.membershipId,
-                      memberStatus: 'archived',
-                      statusReason: 'Unassigned by admin'
-                  });
-              } else {
-                  console.warn(`Cannot unassign class ${cls.className} - missing membershipId`);
-                  // Fallback: Use new API if exists or log error. 
-                  // If we don't have membershipID, we might fail.
-                  return Promise.resolve({ success: false, message: "Missing membership ID" });
-              }
-          });
-          await Promise.all(removePromises);
+        const removePromises = classesToUnassign.map(async (cls) => {
+          if (cls.membershipId) {
+            return updateCohortMemberStatus({
+              membershipId: cls.membershipId,
+              memberStatus: 'archived',
+              statusReason: 'Unassigned by admin'
+            });
+          } else {
+            console.warn(`Cannot unassign class ${cls.className} - missing membershipId`);
+            // Fallback: Use new API if exists or log error. 
+            // If we don't have membershipID, we might fail.
+            return Promise.resolve({ success: false, message: "Missing membership ID" });
+          }
+        });
+        await Promise.all(removePromises);
       }
 
       const message = `Class assignments updated successfully`;
       showToastMessage(message, 'success');
 
       setSnackbar({
-          open: true,
-          message,
-          severity: 'success',
+        open: true,
+        message,
+        severity: 'success',
       });
 
       handleAssignClassDialogClose();
       fetchTeachers(); // Refresh the teacher list
-      
+
     } catch (err: any) {
       console.error('Error updating class assignments:', err);
 
@@ -969,49 +972,49 @@ const TeacherList = () => {
       return dateString || 'N/A';
     }
   };
-useEffect(() => {
-  const fetchTeacherSummaryCounts = async () => {
-    try {
-      const baseParams = {
-        limit: 1, // minimal data
-        offset: 0,
-        sort: ['createdAt', 'asc'] as any,
-      };
+  useEffect(() => {
+    const fetchTeacherSummaryCounts = async () => {
+      try {
+        const baseParams = {
+          limit: 1, // minimal data
+          offset: 0,
+          sort: ['createdAt', 'asc'] as any,
+        };
 
-      const totalResp = await userList({
-        ...baseParams,
-        filters: { role: 'Teacher' },
-      });
+        const totalResp = await userList({
+          ...baseParams,
+          filters: { role: 'Teacher' },
+        });
 
-      const activeResp = await userList({
-        ...baseParams,
-        filters: { role: 'Teacher', status: 'active' },
-      });
+        const activeResp = await userList({
+          ...baseParams,
+          filters: { role: 'Teacher', status: 'active' },
+        });
 
-      const archivedResp = await userList({
-        ...baseParams,
-        filters: { role: 'Teacher', status: 'archived' },
-      });
+        const archivedResp = await userList({
+          ...baseParams,
+          filters: { role: 'Teacher', status: 'archived' },
+        });
 
-      const pendingResp = await userList({
-        ...baseParams,
-        filters: { role: 'Teacher', status: 'pending' },
-      });
+        const pendingResp = await userList({
+          ...baseParams,
+          filters: { role: 'Teacher', status: 'pending' },
+        });
 
-      setSummaryCounts({
-        total: totalResp?.totalCount || 0,
-        active: activeResp?.totalCount || 0,
-        archived: archivedResp?.totalCount || 0,
-        pending: pendingResp?.totalCount || 0,
-        inactive: archivedResp?.totalCount || 0,
-      });
-    } catch (e) {
-      console.error('Error fetching teacher summary counts', e);
-    }
-  };
+        setSummaryCounts({
+          total: totalResp?.totalCount || 0,
+          active: activeResp?.totalCount || 0,
+          archived: archivedResp?.totalCount || 0,
+          pending: pendingResp?.totalCount || 0,
+          inactive: archivedResp?.totalCount || 0,
+        });
+      } catch (e) {
+        console.error('Error fetching teacher summary counts', e);
+      }
+    };
 
-  fetchTeacherSummaryCounts();
-}, []);
+    fetchTeacherSummaryCounts();
+  }, []);
 
   // Get status color
   const getStatusColor = (status: string) => {
@@ -1086,22 +1089,22 @@ useEffect(() => {
   // Group classes by school for the assign class dialog
   const groupedClasses = useMemo(() => {
     const groups: Record<string, ClassAssignment[]> = {};
-    
+
     // Get school IDs that belong to the selected cluster
     const schoolIdsInCluster = selectedAssignmentCluster
       ? new Set(
-          schools
-            .filter((school) => school.parentId === selectedAssignmentCluster)
-            .map((school) => school.cohortId)
-        )
+        schools
+          .filter((school) => school.parentId === selectedAssignmentCluster)
+          .map((school) => school.cohortId)
+      )
       : null;
-    
+
     classAssignments.forEach((cls) => {
       // Filter by cluster if selected
       if (schoolIdsInCluster && !schoolIdsInCluster.has(cls.schoolId)) {
         return;
       }
-      
+
       // Filter by center if selected
       if (
         selectedAssignmentCenter &&
@@ -1142,7 +1145,7 @@ useEffect(() => {
     const filteredSchools = selectedAssignmentCluster
       ? schools.filter((school) => school.parentId === selectedAssignmentCluster)
       : schools;
-    
+
     filteredSchools.forEach((school) => {
       if (school.cohortId && school.name) {
         schoolsMap.set(school.cohortId, school.name);
@@ -1192,7 +1195,7 @@ useEffect(() => {
                 '&:hover': { bgcolor: '#1565c0' },
               }}
             >
-              Add Teacher
+              Add New Teacher
             </Button>
           </Box>
         </Box>
@@ -1488,7 +1491,7 @@ useEffect(() => {
                           </TableSortLabel>
                         </TableCell>
                       )}
-                      
+
                       {columnVisibility.mobile && (
                         <TableCell>Contact</TableCell>
                       )}
@@ -1505,7 +1508,7 @@ useEffect(() => {
                           </TableSortLabel>
                         </TableCell>
                       )}
-                 
+
                       {columnVisibility.actions && (
                         <TableCell>Actions</TableCell>
                       )}
@@ -1568,7 +1571,7 @@ useEffect(() => {
                               </Box>
                             </TableCell>
                           )}
-                     
+
                           {columnVisibility.mobile && (
                             <TableCell>
                               <Box
@@ -1601,7 +1604,7 @@ useEffect(() => {
                           )}
                           {columnVisibility.status && (
                             <TableCell>
-                                <Chip
+                              <Chip
                                 label={getStatusText(teacher.status)}
                                 size="small"
                                 color={getStatusColor(teacher.status) as any}
@@ -1612,7 +1615,7 @@ useEffect(() => {
                               />
                             </TableCell>
                           )}
-                    
+
                           {columnVisibility.actions && (
                             <TableCell>
                               <Box sx={{ display: 'flex', gap: 0.5 }}>
@@ -1635,7 +1638,7 @@ useEffect(() => {
                                     </IconButton>
                                   </Tooltip>
                                 ) : (
-                                   // Show all action buttons for active/non-archived
+                                  // Show all action buttons for active/non-archived
                                   <>
                                     <Tooltip title="Assign Class">
                                       <IconButton
@@ -1652,7 +1655,7 @@ useEffect(() => {
                                       <IconButton
                                         size="small"
                                         onClick={() => handleEditTeacher(teacher)}
-                                        // color="primary"
+                                      // color="primary"
                                       >
                                         <EditIcon fontSize="small" />
                                       </IconButton>
@@ -1942,7 +1945,7 @@ useEffect(() => {
                     </Typography>
                   </Box>
                 ) : (
-                  <List sx={{ p: 0,pb:4}}>
+                  <List sx={{ p: 0, pb: 4 }}>
                     {Object.entries(groupedClasses).map(
                       ([schoolId, schoolClasses]) => {
                         const schoolName =
@@ -2115,13 +2118,22 @@ useEffect(() => {
       </Dialog>
 
       {/* Edit Teacher Modal */}
-      <EditUserModal
-        open={editModalOpen}
-        onClose={() => setEditModalOpen(false)}
-        onSuccess={fetchTeachers}
-        user={teacherToEdit}
-        userType="Teacher"
-      />
+      {isOBLFProgram ? (
+        <OBLFEditTeacherModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          onSuccess={fetchTeachers}
+          user={teacherToEdit}
+        />
+      ) : (
+        <EditUserModal
+          open={editModalOpen}
+          onClose={() => setEditModalOpen(false)}
+          onSuccess={fetchTeachers}
+          user={teacherToEdit}
+          userType="Teacher"
+        />
+      )}
 
       {/* Archive/Unarchive Confirmation Dialog */}
       <Dialog

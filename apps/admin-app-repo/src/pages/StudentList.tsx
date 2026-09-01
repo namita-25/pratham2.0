@@ -78,6 +78,7 @@ import {
   ExpandLess as ExpandLessIcon,
   Close as CloseIcon,
   CloudUpload as CloudUploadIcon,
+  Block as BlockIcon,
 } from '@mui/icons-material';
 import {
   getCohortMemberList,
@@ -662,7 +663,7 @@ const StudentList = () => {
     setArchiveDialogOpen(true);
   };
 
-  // Confirm archive/unarchive
+  // Confirm mark inactive/active
   const handleConfirmArchive = async () => {
     if (!studentToUpdate) return;
 
@@ -682,7 +683,7 @@ const StudentList = () => {
       // Refresh student list
       await fetchStudents();
 
-      const action = newStatus === 'archived' ? 'archived' : 'activated';
+      const action = newStatus === 'archived' ? 'marked inactive' : 'activated';
       showToastMessage(`Student ${action} successfully`, 'success');
       setSnackbar({
         open: true,
@@ -1283,7 +1284,7 @@ const { total, active, archived } = summaryCounts;
             }}
           >
             {/* Active/Inactive Toggle */}
-            {/* <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <ToggleButtonGroup
                 value={statusFilter}
                 exclusive
@@ -1315,7 +1316,7 @@ const { total, active, archived } = summaryCounts;
                   <Typography variant="body2">Inactive</Typography>
                 </ToggleButton>
               </ToggleButtonGroup>
-            </Box> */}
+            </Box>
 
             {/* Cluster Dropdown */}
             {/* <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -2098,7 +2099,7 @@ const { total, active, archived } = summaryCounts;
       >
         <DialogTitle>
           {studentToUpdate?.status === 'active'
-            ? 'Archive Student'
+            ? 'Mark Student Inactive'
             : 'Activate Student'}
         </DialogTitle>
         <DialogContent>
@@ -2133,7 +2134,7 @@ const { total, active, archived } = summaryCounts;
           </Box>
           <Typography>
             {studentToUpdate?.status === 'active'
-              ? `Are you sure you want to archive this student?`
+              ? `Are you sure you want to mark this student as inactive?`
               : `Are you sure you want to activate this student?`}
           </Typography>
           {/* {studentToUpdate?.status === 'active' && (
@@ -2171,7 +2172,7 @@ const { total, active, archived } = summaryCounts;
             {archiveLoading ? (
               <CircularProgress size={24} color="inherit" />
             ) : studentToUpdate?.status === 'active' ? (
-              'Archive'
+              'Mark Inactive'
             ) : (
               'Activate'
             )}
